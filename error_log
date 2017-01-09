@@ -1,0 +1,134 @@
+[05-Jan-2017 21:13:18 UTC] PHP Fatal error:  Uncaught exception 'PDOException' with message 'SQLSTATE[42000] [1044] Access denied for user 'pribcouk_scms'@'localhost' to database 'scms'' in /home/pribcouk/scms.prib.co.uk/App/Controller.php:65
+Stack trace:
+#0 /home/pribcouk/scms.prib.co.uk/App/Controller.php(65): PDO->__construct('mysql:dbname=sc...', 'pribcouk_scms', 'n3qe@DWPBGbP')
+#1 /home/pribcouk/scms.prib.co.uk/index.php(86): Common::LocalDB()
+#2 /home/pribcouk/scms.prib.co.uk/index.php(110): SetLoggedOutGroups()
+#3 {main}
+  thrown in /home/pribcouk/scms.prib.co.uk/App/Controller.php on line 65
+[05-Jan-2017 21:35:24 UTC] PHP Fatal error:  Uncaught exception 'PDOException' with message 'SQLSTATE[42000] [1044] Access denied for user 'pribcouk_scms'@'localhost' to database 'scms'' in /home/pribcouk/scms.prib.co.uk/App/Controller.php:65
+Stack trace:
+#0 /home/pribcouk/scms.prib.co.uk/App/Controller.php(65): PDO->__construct('mysql:dbname=sc...', 'pribcouk_scms', 'n3qe@DWPBGbP')
+#1 /home/pribcouk/scms.prib.co.uk/index.php(86): Common::LocalDB()
+#2 /home/pribcouk/scms.prib.co.uk/index.php(110): SetLoggedOutGroups()
+#3 {main}
+  thrown in /home/pribcouk/scms.prib.co.uk/App/Controller.php on line 65
+[05-Jan-2017 21:35:27 UTC] PHP Fatal error:  Uncaught exception 'PDOException' with message 'SQLSTATE[42000] [1044] Access denied for user 'pribcouk_scms'@'localhost' to database 'scms'' in /home/pribcouk/scms.prib.co.uk/App/Controller.php:65
+Stack trace:
+#0 /home/pribcouk/scms.prib.co.uk/App/Controller.php(65): PDO->__construct('mysql:dbname=sc...', 'pribcouk_scms', 'n3qe@DWPBGbP')
+#1 /home/pribcouk/scms.prib.co.uk/index.php(86): Common::LocalDB()
+#2 /home/pribcouk/scms.prib.co.uk/index.php(110): SetLoggedOutGroups()
+#3 {main}
+  thrown in /home/pribcouk/scms.prib.co.uk/App/Controller.php on line 65
+[05-Jan-2017 21:36:22 UTC] PHP Fatal error:  Using $this when not in object context in /home/pribcouk/scms.prib.co.uk/App/view.php on line 18
+[05-Jan-2017 21:47:51 UTC] PHP Fatal error:  Using $this when not in object context in /home/pribcouk/scms.prib.co.uk/App/view.php on line 18
+[05-Jan-2017 21:48:20 UTC] PHP Fatal error:  Using $this when not in object context in /home/pribcouk/scms.prib.co.uk/App/view.php on line 18
+[05-Jan-2017 21:48:53 UTC] PHP Fatal error:  Using $this when not in object context in /home/pribcouk/scms.prib.co.uk/App/view.php on line 18
+[05-Jan-2017 21:48:57 UTC] PHP Fatal error:  Using $this when not in object context in /home/pribcouk/scms.prib.co.uk/App/view.php on line 18
+[05-Jan-2017 21:52:35 UTC] PHP Fatal error:  Function name must be a string in /home/pribcouk/scms.prib.co.uk/App/Themes/Default/page.tpl.php on line 39
+[05-Jan-2017 21:54:42 UTC] PHP Parse error:  syntax error, unexpected '[', expecting ',' or ';' in /home/pribcouk/scms.prib.co.uk/App/Themes/Default/simm.tpl.php on line 8
+[05-Jan-2017 21:54:46 UTC] PHP Parse error:  syntax error, unexpected '[', expecting ',' or ';' in /home/pribcouk/scms.prib.co.uk/App/Themes/Default/simm.tpl.php on line 8
+[05-Jan-2017 21:55:53 UTC] PHP Fatal error:  require() [<a href='function.require'>function.require</a>]: Failed opening required './App//helpers/Validator.php' (include_path='.:/usr/lib/php:/usr/local/lib/php') in /home/pribcouk/scms.prib.co.uk/App/Controllers/users.php on line 3
+[05-Jan-2017 21:56:54 UTC] PHP Fatal error:  require() [<a href='function.require'>function.require</a>]: Failed opening required './App//helpers/Validator.php' (include_path='.:/usr/lib/php:/usr/local/lib/php') in /home/pribcouk/scms.prib.co.uk/App/Controllers/users.php on line 3
+[05-Jan-2017 21:58:07 UTC] PHP Fatal error:  require() [<a href='function.require'>function.require</a>]: Failed opening required './App/helpers/Validator.php' (include_path='.:/usr/lib/php:/usr/local/lib/php') in /home/pribcouk/scms.prib.co.uk/App/Controllers/users.php on line 3
+[05-Jan-2017 21:58:57 UTC] PHP Fatal error:  require() [<a href='function.require'>function.require</a>]: Failed opening required '/home/pribcouk/scms.prib.co.uk./App/ThirdParty/password.php' (include_path='.:/usr/lib/php:/usr/local/lib/php') in /home/pribcouk/scms.prib.co.uk/App/Controllers/users.php on line 2
+[05-Jan-2017 22:02:49 UTC] PHP Fatal error:  require() [<a href='function.require'>function.require</a>]: Failed opening required '/home/pribcouk/scms.prib.co.uk/home/pribcouk/scms.prib.co.uk/App/ThirdParty/password.php' (include_path='.:/usr/lib/php:/usr/local/lib/php') in /home/pribcouk/scms.prib.co.uk/App/Controllers/users.php on line 2
+[05-Jan-2017 22:03:08 UTC] PHP Fatal error:  require() [<a href='function.require'>function.require</a>]: Failed opening required '/home/pribcouk/scms.prib.co.uk/App//helpers/Validator.php' (include_path='.:/usr/lib/php:/usr/local/lib/php') in /home/pribcouk/scms.prib.co.uk/App/Controllers/users.php on line 3
+[05-Jan-2017 23:25:47 UTC] PHP Parse error:  syntax error, unexpected ';' in /home/pribcouk/scms.prib.co.uk/App/Controllers/users.php on line 69
+[05-Jan-2017 23:25:51 UTC] PHP Parse error:  syntax error, unexpected ';' in /home/pribcouk/scms.prib.co.uk/App/Controllers/users.php on line 69
+[05-Jan-2017 23:25:54 UTC] PHP Parse error:  syntax error, unexpected ';' in /home/pribcouk/scms.prib.co.uk/App/Controllers/users.php on line 69
+[05-Jan-2017 23:26:10 UTC] PHP Parse error:  syntax error, unexpected ';' in /home/pribcouk/scms.prib.co.uk/App/Controllers/users.php on line 69
+[05-Jan-2017 23:26:20 UTC] PHP Parse error:  syntax error, unexpected ';' in /home/pribcouk/scms.prib.co.uk/App/Controllers/users.php on line 69
+[05-Jan-2017 23:26:26 UTC] PHP Parse error:  syntax error, unexpected ';' in /home/pribcouk/scms.prib.co.uk/App/Controllers/users.php on line 69
+[05-Jan-2017 23:27:23 UTC] PHP Fatal error:  Uncaught exception 'Exception' with message 'Required field usersingroups::Name is ommitted.' in /home/pribcouk/scms.prib.co.uk/App/Model.php:110
+Stack trace:
+#0 /home/pribcouk/scms.prib.co.uk/App/Model.php(44): MySQLModelHelper->checkRequired(Array, Array)
+#1 /home/pribcouk/scms.prib.co.uk/App/Models/Users.php(233): MySQLModelHelper->Add(Array, Array)
+#2 /home/pribcouk/scms.prib.co.uk/App/Controllers/users.php(70): models\UserInGroupsModel->Add(Array)
+#3 /home/pribcouk/scms.prib.co.uk/App/view.php(29): require_once('/home/pribcouk/...')
+#4 /home/pribcouk/scms.prib.co.uk/App/Themes/Default/page.tpl.php(39): View->Call('users')
+#5 /home/pribcouk/scms.prib.co.uk/App/view.php(21): require('/home/pribcouk/...')
+#6 /home/pribcouk/scms.prib.co.uk/index.php(117): View->Show('page.tpl.php')
+#7 {main}
+  thrown in /home/pribcouk/scms.prib.co.uk/App/Model.php on line 110
+[05-Jan-2017 23:57:39 UTC] PHP Fatal error:  Class 'models\Exception' not found in /home/pribcouk/scms.prib.co.uk/App/Models/Content.php on line 274
+[05-Jan-2017 23:57:43 UTC] PHP Fatal error:  Class 'models\Exception' not found in /home/pribcouk/scms.prib.co.uk/App/Models/Content.php on line 274
+[05-Jan-2017 23:59:17 UTC] PHP Fatal error:  Uncaught exception 'Exception' with message 'Access Denied' in /home/pribcouk/scms.prib.co.uk/App/Models/Content.php:274
+Stack trace:
+#0 /home/pribcouk/scms.prib.co.uk/App/Controllers/simm.php(30): models\ContentModel->Get(0)
+#1 /home/pribcouk/scms.prib.co.uk/App/Controllers/simm.php(113): Manifest()
+#2 /home/pribcouk/scms.prib.co.uk/App/view.php(29): require_once('/home/pribcouk/...')
+#3 /home/pribcouk/scms.prib.co.uk/App/Themes/Default/page.tpl.php(39): View->Call('simm')
+#4 /home/pribcouk/scms.prib.co.uk/App/view.php(21): require('/home/pribcouk/...')
+#5 /home/pribcouk/scms.prib.co.uk/index.php(116): View->Show('page.tpl.php')
+#6 {main}
+  thrown in /home/pribcouk/scms.prib.co.uk/App/Models/Content.php on line 274
+[06-Jan-2017 00:00:42 UTC] PHP Fatal error:  Uncaught exception 'Exception' with message 'Access Denied' in /home/pribcouk/scms.prib.co.uk/App/Models/Content.php:274
+Stack trace:
+#0 /home/pribcouk/scms.prib.co.uk/App/Controllers/simm.php(30): models\ContentModel->Get(0)
+#1 /home/pribcouk/scms.prib.co.uk/App/Controllers/simm.php(113): Manifest()
+#2 /home/pribcouk/scms.prib.co.uk/App/view.php(29): require_once('/home/pribcouk/...')
+#3 /home/pribcouk/scms.prib.co.uk/App/Themes/Default/page.tpl.php(39): View->Call('simm')
+#4 /home/pribcouk/scms.prib.co.uk/App/view.php(21): require('/home/pribcouk/...')
+#5 /home/pribcouk/scms.prib.co.uk/index.php(116): View->Show('page.tpl.php')
+#6 {main}
+  thrown in /home/pribcouk/scms.prib.co.uk/App/Models/Content.php on line 274
+[06-Jan-2017 00:00:50 UTC] PHP Fatal error:  Uncaught exception 'Exception' with message 'Access Denied' in /home/pribcouk/scms.prib.co.uk/App/Models/Content.php:274
+Stack trace:
+#0 /home/pribcouk/scms.prib.co.uk/App/Controllers/simm.php(30): models\ContentModel->Get(0)
+#1 /home/pribcouk/scms.prib.co.uk/App/Controllers/simm.php(113): Manifest()
+#2 /home/pribcouk/scms.prib.co.uk/App/view.php(29): require_once('/home/pribcouk/...')
+#3 /home/pribcouk/scms.prib.co.uk/App/Themes/Default/page.tpl.php(39): View->Call('simm')
+#4 /home/pribcouk/scms.prib.co.uk/App/view.php(21): require('/home/pribcouk/...')
+#5 /home/pribcouk/scms.prib.co.uk/index.php(116): View->Show('page.tpl.php')
+#6 {main}
+  thrown in /home/pribcouk/scms.prib.co.uk/App/Models/Content.php on line 274
+[06-Jan-2017 00:00:53 UTC] PHP Fatal error:  Uncaught exception 'Exception' with message 'Access Denied' in /home/pribcouk/scms.prib.co.uk/App/Models/Content.php:274
+Stack trace:
+#0 /home/pribcouk/scms.prib.co.uk/App/Controllers/simm.php(30): models\ContentModel->Get(0)
+#1 /home/pribcouk/scms.prib.co.uk/App/Controllers/simm.php(113): Manifest()
+#2 /home/pribcouk/scms.prib.co.uk/App/view.php(29): require_once('/home/pribcouk/...')
+#3 /home/pribcouk/scms.prib.co.uk/App/Themes/Default/page.tpl.php(39): View->Call('simm')
+#4 /home/pribcouk/scms.prib.co.uk/App/view.php(21): require('/home/pribcouk/...')
+#5 /home/pribcouk/scms.prib.co.uk/index.php(116): View->Show('page.tpl.php')
+#6 {main}
+  thrown in /home/pribcouk/scms.prib.co.uk/App/Models/Content.php on line 274
+[06-Jan-2017 00:02:35 UTC] PHP Fatal error:  Uncaught exception 'Exception' with message 'Access Denied' in /home/pribcouk/scms.prib.co.uk/App/Models/Content.php:276
+Stack trace:
+#0 /home/pribcouk/scms.prib.co.uk/App/Controllers/simm.php(30): models\ContentModel->Get(0)
+#1 /home/pribcouk/scms.prib.co.uk/App/Controllers/simm.php(113): Manifest()
+#2 /home/pribcouk/scms.prib.co.uk/App/view.php(29): require_once('/home/pribcouk/...')
+#3 /home/pribcouk/scms.prib.co.uk/App/Themes/Default/page.tpl.php(39): View->Call('simm')
+#4 /home/pribcouk/scms.prib.co.uk/App/view.php(21): require('/home/pribcouk/...')
+#5 /home/pribcouk/scms.prib.co.uk/index.php(116): View->Show('page.tpl.php')
+#6 {main}
+  thrown in /home/pribcouk/scms.prib.co.uk/App/Models/Content.php on line 276
+[06-Jan-2017 00:02:56 UTC] PHP Fatal error:  Uncaught exception 'Exception' with message 'Access Denied' in /home/pribcouk/scms.prib.co.uk/App/Models/Content.php:276
+Stack trace:
+#0 /home/pribcouk/scms.prib.co.uk/App/Controllers/simm.php(30): models\ContentModel->Get(0)
+#1 /home/pribcouk/scms.prib.co.uk/App/Controllers/simm.php(113): Manifest()
+#2 /home/pribcouk/scms.prib.co.uk/App/view.php(29): require_once('/home/pribcouk/...')
+#3 /home/pribcouk/scms.prib.co.uk/App/Themes/Default/page.tpl.php(39): View->Call('simm')
+#4 /home/pribcouk/scms.prib.co.uk/App/view.php(21): require('/home/pribcouk/...')
+#5 /home/pribcouk/scms.prib.co.uk/index.php(116): View->Show('page.tpl.php')
+#6 {main}
+  thrown in /home/pribcouk/scms.prib.co.uk/App/Models/Content.php on line 276
+[06-Jan-2017 00:05:38 UTC] PHP Fatal error:  Uncaught exception 'Exception' with message 'Access Denied' in /home/pribcouk/scms.prib.co.uk/App/Models/Content.php:276
+Stack trace:
+#0 /home/pribcouk/scms.prib.co.uk/App/Controllers/simm.php(30): models\ContentModel->Get(0)
+#1 /home/pribcouk/scms.prib.co.uk/App/Controllers/simm.php(113): Manifest()
+#2 /home/pribcouk/scms.prib.co.uk/App/view.php(29): require_once('/home/pribcouk/...')
+#3 /home/pribcouk/scms.prib.co.uk/App/Themes/Default/page.tpl.php(39): View->Call('simm')
+#4 /home/pribcouk/scms.prib.co.uk/App/view.php(21): require('/home/pribcouk/...')
+#5 /home/pribcouk/scms.prib.co.uk/index.php(116): View->Show('page.tpl.php')
+#6 {main}
+  thrown in /home/pribcouk/scms.prib.co.uk/App/Models/Content.php on line 276
+[06-Jan-2017 00:06:20 UTC] PHP Fatal error:  Uncaught exception 'Exception' with message 'Access Denied' in /home/pribcouk/scms.prib.co.uk/App/Models/Content.php:276
+Stack trace:
+#0 /home/pribcouk/scms.prib.co.uk/App/Controllers/simm.php(30): models\ContentModel->Get(0)
+#1 /home/pribcouk/scms.prib.co.uk/App/Controllers/simm.php(113): Manifest()
+#2 /home/pribcouk/scms.prib.co.uk/App/view.php(29): require_once('/home/pribcouk/...')
+#3 /home/pribcouk/scms.prib.co.uk/App/Themes/Default/page.tpl.php(39): View->Call('simm')
+#4 /home/pribcouk/scms.prib.co.uk/App/view.php(21): require('/home/pribcouk/...')
+#5 /home/pribcouk/scms.prib.co.uk/index.php(116): View->Show('page.tpl.php')
+#6 {main}
+  thrown in /home/pribcouk/scms.prib.co.uk/App/Models/Content.php on line 276

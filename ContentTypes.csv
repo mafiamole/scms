@@ -1,0 +1,10 @@
+,1,Rank,Image
+,1,Position,String
+,1,Group,String
+,1,Gender,String
+,1,Species,String
+,1,Age,Integer
+,1,Height,Number
+,1,Hair Colour,String
+,1,Eye Colour,String
+,1,Physical Description,String
