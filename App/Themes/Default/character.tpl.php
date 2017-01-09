@@ -1,11 +1,13 @@
 				
 				<?php 
-				$character = $this->GetData('character');
-				$fields = $this->GetData('fields');
+				//$character = $this->GetData('character');
+				//$fields = $this->GetData('fields');
+				$character 	= $data->Get('character');
+				$fields 	= $data->Get('fields');
 				if ($character) {
 					?>
 					<header class="jumbotron">
-						<h1 class="page-header"><?php echo $this->GetConfig('page_title');?></h1>
+						<h1 class="page-header"><?php $config('page_title');?></h1>
 <?php
 if (isset($_SESSION['user']->Id) && $character->UserId == $_SESSION['user']->Id) {
 ?>

@@ -32,8 +32,13 @@ function Manifest()
 				$character = $contentModel->Get($pos->Character*1);
 				if ($character) {
 					//$positionGroupsData[$key]->Positions[$key] = new stdclass();
+					$canEdit = (System::LoggedIn() && $_SESSION['user']->Id == $character->UserId);
+					
 					$character->Rank = $contentModel->Get($character->Rank);
-					$positions[$key2]->Character = $character;					
+					$character->CanEdit = $canEdit;
+					$positions[$key2]->Character = $character;
+					
+					
 				} else {
 					$positions[$key2]->Character = new stdclass();
 				}
@@ -145,9 +150,11 @@ function SimmDescription()
 	);
 }
 
-if (array_key_exists(1,$parameters)) {
+$parameter1 = $parameters->Get(1);
+$parameter2 = $parameters->Get(2);
+if ($parameter1) {
 
-	switch(strtolower($parameters[1]))
+	switch($parameter1)
 	{
 		case "create":
 			$contentModel=LoadModel(Common::LocalDB(),"Content","ContentModel");
@@ -178,18 +185,17 @@ if (array_key_exists(1,$parameters)) {
 				$id = AddCharacter();
 				header("location:/simm/edit/{$id}");
 			}
-			$this->data['fields'] 			= $characterFields;
-			$this->data['postData']			= $postData;
-			$this->data['additionalData'] 	= $additionalContent;
-			$this->data['selectedPosition'] = $_GET['position'] * 1;
+			$this->AddData('fields',$characterFields);
+			$this->AddData('postData',$postData);
+			$this->AddData('additionalData',$additionalContent);
+			$this->AddData('selectedPosition',$_GET['position'] * 1);
 			
-			$contentView 					= new View($this->theme,$this->defaults,$this->data,$this->config);		
 			$contentView 					= new View($this->theme,$this->defaults,$this->data,$this->config);
 			echo $contentView->show('createCharacter.tpl.php');
 		break;
 		case "edit":
-			if ( array_key_exists(2,$parameters) ) {
-				$characterId = $parameters[2];
+			if ( $parameter2 ) {
+				$characterId = $parameter2*1;
 				$contentModel=LoadModel(Common::LocalDB(),"Content","ContentModel");
 				$ctfm = LoadModel(Common::LocalDB(),"Content","ContentTypeFieldsModel");
 				
@@ -213,25 +219,25 @@ if (array_key_exists(1,$parameters)) {
 						header("location:/simm/edit/{$characterId}");
 					}
 				}
-				$this->data['fields'] 				= $characterFields;
-				$this->data['character']			= GetCharacter($characterId);
-				$this->data['additionalData'] 	= $additionalContent;
+				$this->AddData('fields',$characterFields);
+				$this->AddData('character',GetCharacter($characterId));
+				$this->AddData('additionalData',$additionalContent);
 				
-				$contentView 					= new View($this->theme,$this->defaults,$this->data,$this->config);		
 				$contentView 					= new View($this->theme,$this->defaults,$this->data,$this->config);
 				echo $contentView->show('editCharacter.tpl.php');
 			}
 		break;
 		case "view":
-			if ( array_key_exists(2,$parameters) ) {
+			
+			if ( $parameter2 ) {
 				
-				$characterID 	= isset($parameters[2])?(int)$parameters[2]:0;
+				$characterID 	= $parameter2*1;
 				$character 		= GetCharacter($characterID);
 				$ctfModel		= LoadModel(Common::LocalDB(),"Content","ContentTypeFieldsModel");
 				$fields= $ctfModel->GetContentTypeFieldsByName("Character");
 				$this->AddData('character',$character);
 				$this->AddData('fields',$fields);
-				$this->config['page_title'] = "Viewing ".($character->ContentTitle?"{$character->ContentTitle}'s":"")." Profile";
+				$this->AddConfig('page_title',"Viewing ".($character->ContentTitle?"{$character->ContentTitle}'s":"")." Profile");
 				$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);
 				echo $contentView->show('character.tpl.php');
 			}
@@ -239,8 +245,8 @@ if (array_key_exists(1,$parameters)) {
 		
 	}
 } else {
-	$this->data['manifest'] = Manifest();
-	$this->data['description'] = SimmDescription();
+	$this->AddData('manifest',Manifest());
+	$this->AddData('description',SimmDescription());	
 	$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);		
 	echo $contentView->show('simm.tpl.php');
 }

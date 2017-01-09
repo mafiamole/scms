@@ -36,7 +36,7 @@
 			</nav>
 		</header>
 		<main class="container"  role="main">
-			<?php $this->Call($this->data['pageController']->Controller);?>
+			<?php $this->Call($data->Get('pageController','Controller'));?>
 		</main>
 		<footer class="container text-center">
 			<a href="">&copy; Starfleet Strategic Response Fleet 2016. All rights reserved.</a><br />
