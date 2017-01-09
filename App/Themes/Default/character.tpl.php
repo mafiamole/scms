@@ -7,7 +7,7 @@
 					<header class="jumbotron">
 						<h1 class="page-header"><?php echo $this->GetConfig('page_title');?></h1>
 <?php
-if ($character->UserId == $_SESSION['user']->Id) {
+if (isset($_SESSION['user']->Id) && $character->UserId == $_SESSION['user']->Id) {
 ?>
 						<a class="btn btn-primary btn-lg" href="/simm/edit/<?php echo $character->ContentId;?>" class="btn btn-primary" role="button">Edit</a>
 <?php

@@ -1,5 +1,12 @@
 <?php
 
+class Stories
+{
+	private $db;
+	private $name;
+	
+}
+
 Class Characters
 {
 	private $db;

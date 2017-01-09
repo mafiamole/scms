@@ -27,7 +27,7 @@
 						$character = $position->Character;
 						
 						$characterRank = (isset($character->Rank)?$character->Rank:null);
-						$canEditCharacter = ($character != null && $character->UserId == $_SESSION['user']->Id);
+						$canEditCharacter = isset($_SESSION['user']->Id) && ($character != null && $character->UserId == $_SESSION['user']->Id);
 					?>
 							<li class="media">
 								<div class="media-left">
