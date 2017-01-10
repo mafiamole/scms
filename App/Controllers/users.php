@@ -2,16 +2,13 @@
 require(APP_FOLDER . "/ThirdParty/password.php");
 require(APP_FOLDER . "/Helpers/Validator.php");
 
-if ( array_key_exists(1,$parameters) ) {
-	$function = $parameters[1];
-} else {
-	$function = "";
-}
+$parameter1 = $parameters->Get(1);
+$parameter2 = $parameters->Get(2);
+
 $isPost = (isset($_POST) && !empty($_POST));
 
-$this->data['postData'] = array();
-$this->data['errors'] = array();
-$db = Common::LocalDB();
+$this->data['PostData'] = array();
+
 function Login() {
 	
 	$sanitizer = new Sanitize($_POST);
@@ -41,30 +38,31 @@ function Login() {
 		return $errors;
 	}
 }
-switch ( $function ) {
+switch ( strtolower($parameter1) ) {
 	case "register":
 		$config['page_title'] 						= "Register";
-		$this->data['postData']['email'] 			= "";
-		$this->data['postData']['password'] 		= "";
-		$this->data['postData']['confirmPassword'] 	= "";
+		$this->data['PostData']['Email'] 			= "";
+		$this->data['PostData']['Password'] 		= "";
+		$this->data['PostData']['ConfirmPassword'] 	= "";
+        $postErrors = array();
 		if ($isPost) {
 			$sanitizer = new Sanitize($_POST);
-			$this->data['postData']['email'] 	= $sanitizer->CheckEmail('email');
-			$this->data['postData']['password'] = $sanitizer->CheckRegPassword('password','confirmPassword');
-			if ( !$this->data['postData']['email'] ) {
-				$this->data['errors']['email'] = "Invalid email address entered";
+			$this->data['PostData']['Email'] 	= $sanitizer->CheckEmail('email');
+			$this->data['PostData']['Password'] = $sanitizer->CheckRegPassword('password','confirmPassword');
+			if ( !$this->data['PostData']['Email'] ) {
+				$postErrors['Email'] = "Invalid email address entered";
 			}
-			if ( !$this->data['postData']['password'] ) {
-				$this->data['errors']['email'] = "Invalid email address entered";
+			if ( !$this->data['PostData']['Password'] ) {
+				$postErrors['Password'] = "Invalid password address entered";
 			}			
 			$model 			= LoadModel($db,'Users','UsersModel');
             $InGroupsModel  = LoadModel($db,'Users','UserInGroupsModel');
             //$groupsModel    = LoadModel($db,'Users',"UserGroupsModel");
             //$groupsModel->get(2);// TODO: make dynamic like
 
-			$this->data['errors'] = $sanitizer->GetErrors();
-			Debug($this->data['postData']);
-			if ( count($this->data['errors']) == 0 ) {
+			$postErrors = $sanitizer->GetErrors();
+            
+			if ( $this->errors->Count('Post') == 0) {
 				$user = $model->Add(array(
 					'Email'=>$this->data['postData']['email'],
 					'Password'=>$this->data['postData']['password'],
@@ -78,12 +76,13 @@ switch ( $function ) {
                     )
                 );
 				if ($user) {
-					$this->data['errors'] = Login();
+					$postErrors = Login();
 				} else {
-					$this->data['errors']['email'] = "Unable to add user";
+					$postErrors['Email'] = "Unable to add user";
 				}
 			}
 		}
+        $this->errors->Add('Post',$postErrors);
 		$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);
 		echo $contentView->show('register.tpl.php');
 	break;
@@ -101,7 +100,8 @@ switch ( $function ) {
 		$config['page_title'] = "Login";		
 		if ( !empty($_POST) ) {
 			// process login
-			$this->data['errors'] = Login();
+			$err = Login();
+            $this->errors->Add('Post',$err);
 		}
 		$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);
 		echo $contentView->show('login.tpl.php');

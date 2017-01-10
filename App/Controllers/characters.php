@@ -1,20 +1,11 @@
 <?php
-if ( count($parameters) > 1 ) {
-	$function = $parameters[1];
-} else {
-	$function = "";
-}
-$characterFields=array(
-			'group'		=> "Group",
-			'position'	=> "Role",
-			'rank'		=> "Rank",
-			'name'		=> "Name",
-			'view'		=> "View"
-		);
-		
-require_once(APP_FOLDER . "testCharacterList.php");
+
+$parameter1 = $parameters->Get(1);
+$parameter2 = $parameters->Get(2);
+
 $contentModel=LoadModel(Common::LocalDB(),"Content","ContentModel");
-switch ( $function ) {
+
+switch ($parameter1) {
 	case "create":
 		
 		$this->config['page_title'] = "Create a new Character";
@@ -24,14 +15,14 @@ switch ( $function ) {
 	case "view":
 		$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);
 		$this->config['page_title'] = "Viewing Profile";
-		$characterID = isset($parameters[2])?(int)$parameters[2]-1:0;
+		$characterID = $parameter2;
 
 		if (array_key_exists($characterID,$characters))
 		{
-			$this->data['character'] = $characters[$characterID];
+			$this->data['Character'] = $characters[$characterID];
 			$this->config['page_title'] = $characters[$characterID]['name'] . "'s Profile";
 		} else {
-			$contentView->AddData('character',null);
+			$contentView->AddData('Character',null);
 		}
 		$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);
 		echo $contentView->show('character.tpl.php');		
@@ -39,8 +30,8 @@ switch ( $function ) {
 	default:
 		
 		$this->config['page_title'] = "Characters";
-		$this->data['headers'] = $characterFields;
-		$this->data['characters'] = $characters;
+		$this->data['Headers'] = $characterFields;
+		$this->data['Characters'] = $characters;
 		$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);
 		echo $contentView->show('characters.tpl.php');
 	break;	

@@ -1,12 +1,7 @@
 <?php
 
-if ( count($parameters) > 1 ) {
-	$function = $parameters[1];
-} else {
-	$function = "";
-}
-require_once(APP_FOLDER . "testCharacterList.php");
-
+$parameter1 = $parameters(1);
+$parameter2 = $parameters(2);
 function AddQuest()
 {
 	
@@ -144,19 +139,20 @@ switch ( $function ) {
 		$this->config['page_title'] = "Create a new Quest Post";
 		$qID = isset($parameters[2])?(int)$parameters[2]:0;
 		$characters = GetCharacters();
-		$this->data['UsersCharacters'] = $characters;
-		$this->data['OthersCharacters'] = $characters;
-		$this->data['postData'] = array(
+		$this->data->Add('UsersCharacters',$characters);
+		$this->data->Add('OthersCharacters',$characters);
+		$this->data->Add('PostData', array(
 			'Title' => "",
 			'Description' => "",
 			'UsersCharacters' => array(),
 			'OthersCharacters' => array()
-			);
-		$this->data['errors'] = array();
+			));
+		;
+        $postErr = array();
 		if (isset($_POST) && !empty($_POST))
 		{			
 			if ( isset($_POST['Title']) ) {
-				$this->data['postData']['Title'] = strip_tags($_POST['Title']);
+				$this->data['PostData']['Title'] = strip_tags($_POST['Title']);
 			}
 			
 			if ( isset($_POST['Description']) ) 
@@ -164,41 +160,41 @@ switch ( $function ) {
 				$body = strip_tags($_POST['Description']);
 				if ( strlen($body) <= 0 )
 				{
-					$this->data['errors']['Description'] = 'Please enter the body of your post';
+					$err['Description'] = 'Please enter the body of your post';
 				}
-				$this->data['postData']['Description'] = $body;
+				$this->data['PostData']['Description'] = $body;
 			} else {
-				$this->data['errors']['bodyDescription'] = 'Body not found';
+				$postErr['Description'] ='Description not found';
 			}
 			if ( isset($_POST['UsersCharacters']) && count($_POST['UsersCharacters']) > 0  ) {
 				foreach ( $_POST['UsersCharacters'] as $character ) 
 				{
-					$this->data['postData']['UsersCharacters'][] = $character * 1;
+					$this->data['PostData']['UsersCharacters'][] = $character * 1;
 				}
 			} else {
-				$this->data['errors']['UsersCharacters'] = 'No user characters selected';
+				$postErr['UsersCharacters'] = 'No user characters selected';
 			}
 			if ( isset($_POST['OthersCharacters']) && count($_POST['OthersCharacters']) > 0  ) {
 				foreach ( $_POST['OthersCharacters'] as $character ) 
 				{
-					$this->data['postData']['OthersCharacters'][] = $character * 1;
+					$this->data['PostData']['OthersCharacters'][] = $character * 1;
 				}				
 			}	
-			if ( AddPost($this->data['postData'],$qID) ) {
+			if ( AddPost($this->data['PostData'],$qID) ) {
 				header("locations:/quests/view/".$qID);
 			}			
 		}
-		
-
+		$this->errors->Add('Post',$postErr);
 		$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);		
 		echo $contentView->show('createQuestPost.tpl.php');
 	break;	
 	case "view":		
 		$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);
-		$qID = isset($parameters[2])?(int)$parameters[2]:0;
+		$qID = $parameter2;
 		$quest = GetQuest($qID);
-		$this->data['quest'] = $quest;
-		if ($quest != null) {			
+		$this->data['Quest'] = $quest;
+		if ($quest != null)
+        {			
 			$this->config['page_title'] = "Viewing ".$quest->ContentTitle;
 		}
 		$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);
@@ -206,7 +202,7 @@ switch ( $function ) {
 	break;
 	default:
 		$config['page_title'] = "Quests";
-		$this->data['questCategories'] = GetQuests();
+		$this->data['QuestCategories'] = GetQuests();
         
 		$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);
 		echo $contentView->show('quests.tpl.php');

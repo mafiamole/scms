@@ -1,6 +1,6 @@
 
 
-				<h1 class="page-header"><?php echo $this->GetConfig('page_title');?></h1>
+				<h1 class="page-header"><?php $data('page_title');?></h1>
 				<p>
-				<?php echo $this->GetData('about_site');?>
+				<?php $data('about_site');?>
 				</p>

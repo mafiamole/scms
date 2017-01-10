@@ -110,6 +110,23 @@ function GetURIS($path) {
 SetLoggedOutGroups();
 $parameters = GetURIS($_SERVER['REQUEST_URI']);
 $data['parameters'] = $parameters;
+$data['TopNavigation'] = array
+(
+    array('ContentTitle'=>'Home','URL'=>'/','UserGroups'=>array('Id'=>1,2,3)),
+    array('ContentTitle'=>'Simm','URL'=>'/simm','UserGroups'=>array('Id'=>1,2,3)),
+    array('ContentTitle'=>'Stories','URL'=>'/quests','UserGroups'=>array('Id'=>1,2,3)),
+    array('ContentTitle'=>'Login','URL'=>'/users/login','UserGroups'=>array('Id'=>2,3)),
+    array('ContentTitle'=>'Register','URL'=>'/users/register','UserGroups'=>array('Id'=>2,3)),
+    array('ContentTitle'=>'Logout','URL'=>'/users/logout','UserGroups'=>array('Id'=>1))
+);
+foreach ($data['TopNavigation'] as $key => $tn)
+{
+    $regex = "#^".preg_quote($tn->URL)."#";
+    if (preg_match($regex,$_SERVER['REQUEST_URI']) !== false )
+    {
+        $data['TopNavigation'][$key]['Active'] = true;
+    }
+}
 
 $page = new PageView($theme,$defaults,$data,$config);
 

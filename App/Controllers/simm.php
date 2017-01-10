@@ -1,6 +1,6 @@
 <?php
 
-$isPost = (isset($_POST) && !empty($_POST));
+
 
 //$contentModel=LoadModel($this->db,"Content","ContentModel");
 
@@ -152,101 +152,100 @@ function SimmDescription()
 
 $parameter1 = $parameters->Get(1);
 $parameter2 = $parameters->Get(2);
-if ($parameter1) {
 
-	switch($parameter1)
-	{
-		case "create":
-			$contentModel=LoadModel(Common::LocalDB(),"Content","ContentModel");
-			$ctfm = LoadModel(Common::LocalDB(),"Content","ContentTypeFieldsModel");
-			
-			$characterFields = $ctfm->GetContentTypeFieldsByName("Character");
-			$postData 			= array();
-			$additionalContent 	= array();
-			$groups = (isset($_SESSION['user']->groups)?$_SESSION['user']->groups:array());
-            
-			foreach ($characterFields as $field)
-			{
-				$key 		= $field->Name;
-				$inGet 		= array_key_exists($key,$_GET);
-				$inPost 	= array_key_exists($key,$_POST);
-				$value 		= $inPost?$_POST[$key]: ($inGet?$_GET[$key]:"");
-				$postData[$field->Name] = $value;
-                
-				if ( strtolower($field->Type) == "content")
-				{
-                    
-					$subData 								= $contentModel->GetContentByTypeId($field->TypeData,$groups);
-					$additionalContent[$field->TypeData] 	= $subData;
-				}
-			}
-			if ($isPost)
-			{
-				$id = AddCharacter();
-				header("location:/simm/edit/{$id}");
-			}
-			$this->AddData('fields',$characterFields);
-			$this->AddData('postData',$postData);
-			$this->AddData('additionalData',$additionalContent);
-			$this->AddData('selectedPosition',$_GET['position'] * 1);
-			
-			$contentView 					= new View($this->theme,$this->defaults,$this->data,$this->config);
-			echo $contentView->show('createCharacter.tpl.php');
-		break;
-		case "edit":
-			if ( $parameter2 ) {
-				$characterId = $parameter2*1;
-				$contentModel=LoadModel(Common::LocalDB(),"Content","ContentModel");
-				$ctfm = LoadModel(Common::LocalDB(),"Content","ContentTypeFieldsModel");
-				
-				$characterFields = $ctfm->GetContentTypeFieldsByName("Character");
-				$postData 			= array();
-				$additionalContent 	= array();
-				$groups = (isset($_SESSION['user']->groups)?$_SESSION['user']->groups:array());
+$isPost = (isset($_POST) && !empty($_POST));
 
-				foreach ($characterFields as $field)
-				{					
-					if ( strtolower($field->Type) == "content")
-					{						
-						$subData 								= $contentModel->GetContentByTypeId($field->TypeData,$groups);
-						$additionalContent[$field->TypeData] 	= $subData;
-					}
-				}
-				if ($isPost)
-				{
-					$id = EditCharacter();
-					if ($id) {
-						header("location:/simm/edit/{$characterId}");
-					}
-				}
-				$this->AddData('fields',$characterFields);
-				$this->AddData('character',GetCharacter($characterId));
-				$this->AddData('additionalData',$additionalContent);
-				
-				$contentView 					= new View($this->theme,$this->defaults,$this->data,$this->config);
-				echo $contentView->show('editCharacter.tpl.php');
-			}
-		break;
-		case "view":
-			
-			if ( $parameter2 ) {
-				
-				$characterID 	= $parameter2*1;
-				$character 		= GetCharacter($characterID);
-				$ctfModel		= LoadModel(Common::LocalDB(),"Content","ContentTypeFieldsModel");
-				$fields= $ctfModel->GetContentTypeFieldsByName("Character");
-				$this->AddData('character',$character);
-				$this->AddData('fields',$fields);
-				$this->AddConfig('page_title',"Viewing ".($character->ContentTitle?"{$character->ContentTitle}'s":"")." Profile");
-				$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);
-				echo $contentView->show('character.tpl.php');
-			}
-		break;
-		
-	}
-} else {
-	$this->AddData('manifest',Manifest());
-	$this->AddData('description',SimmDescription());	
-	$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);		
-	echo $contentView->show('simm.tpl.php');
+switch($parameter1)
+{
+    case "create":
+        $contentModel=LoadModel(Common::LocalDB(),"Content","ContentModel");
+        $ctfm = LoadModel(Common::LocalDB(),"Content","ContentTypeFieldsModel");
+
+        $characterFields = $ctfm->GetContentTypeFieldsByName("Character");
+        $postData 			= array();
+        $additionalContent 	= array();
+        $groups = (isset($_SESSION['user']->groups)?$_SESSION['user']->groups:array());
+
+        foreach ($characterFields as $field)
+        {
+            $key 		= $field->Name;
+            $inGet 		= array_key_exists($key,$_GET);
+            $inPost 	= array_key_exists($key,$_POST);
+            $value 		= $inPost?$_POST[$key]: ($inGet?$_GET[$key]:"");
+            $postData[$field->Name] = $value;
+
+            if ( strtolower($field->Type) == "content")
+            {
+
+                $subData 								= $contentModel->GetContentByTypeId($field->TypeData,$groups);
+                $additionalContent[$field->TypeData] 	= $subData;
+            }
+        }
+        if ($isPost)
+        {
+            $id = AddCharacter();
+            header("location:/simm/edit/{$id}");
+        }
+        $this->AddData('Fields',$characterFields);
+        $this->AddData('PostData',$postData);
+        $this->AddData('additionalData',$additionalContent);
+        $this->AddData('SelectedPosition',$_GET['position'] * 1);
+        
+        $contentView 					= new View($this->theme,$this->defaults,$this->data,$this->config);
+        echo $contentView->show('createCharacter.tpl.php');
+    break;
+    case "edit":
+        if ( $parameter2 ) {
+            $characterId = $parameter2*1;
+            $contentModel=LoadModel(Common::LocalDB(),"Content","ContentModel");
+            $ctfm = LoadModel(Common::LocalDB(),"Content","ContentTypeFieldsModel");
+
+            $characterFields = $ctfm->GetContentTypeFieldsByName("Character");
+            $postData 			= array();
+            $additionalContent 	= array();
+            $groups = (isset($_SESSION['user']->groups)?$_SESSION['user']->groups:array());
+
+            foreach ($characterFields as $field)
+            {					
+                if ( strtolower($field->Type) == "content")
+                {						
+                    $subData 								= $contentModel->GetContentByTypeId($field->TypeData,$groups);
+                    $additionalContent[$field->TypeData] 	= $subData;
+                }
+            }
+            if ($isPost)
+            {
+                $id = EditCharacter();
+                if ($id) {
+                    header("location:/simm/edit/{$characterId}");
+                }
+            }
+            $this->AddData('Fields',$characterFields);
+            $this->AddData('Character',GetCharacter($characterId));
+            $this->AddData('AdditionalData',$additionalContent);
+
+            $contentView 					= new View($this->theme,$this->defaults,$this->data,$this->config);
+            echo $contentView->show('editCharacter.tpl.php');
+        }
+    break;
+    case "view":
+        if ( $parameter2 )
+        {
+            $characterID 	= $parameter2*1;
+            $character 		= GetCharacter($characterID);
+            $ctfModel		= LoadModel(Common::LocalDB(),"Content","ContentTypeFieldsModel");
+            $fields= $ctfModel->GetContentTypeFieldsByName("Character");
+            $this->AddData('Character',$character);
+            $this->AddData('Fields',$fields);
+            $this->AddConfig('page_title',"Viewing ".($character->ContentTitle?"{$character->ContentTitle}'s":"")." Profile");
+            $contentView = new View($this->theme,$this->defaults,$this->data,$this->config);
+            echo $contentView->show('character.tpl.php');
+        }
+    break;
+    default:
+        $this->AddData('Manifest',Manifest());
+        $this->AddData('Description',SimmDescription());	
+        $contentView = new View($this->theme,$this->defaults,$this->data,$this->config);		
+        echo $contentView->show('simm.tpl.php');            
+    break;
 }

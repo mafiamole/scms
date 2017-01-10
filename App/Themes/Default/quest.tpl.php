@@ -1,11 +1,12 @@
 				
-				<?php 
-				$quest = $this->GetData('quest');
-				if ($quest) {
+				<?php
+				if ($data->Has('quest')) {
+                    $quest = $data->quest;
+                    $postCount = $quest->Count('Posts');
 					?>
 				<header class="jumbotron">
-					<h1 class="page-header"><?php echo $this->GetConfig('page_title');?> <span class="badge"><?php echo count($quest->Posts);?></span></h1>
-					<a class="btn btn-primary btn-lg" href="/quests/post/<?php echo $quest->ContentId;?>">Create a new post!</a>
+					<h1 class="page-header"><?php $data('page_title');?> <span class="badge"><?php echo $postCount;?></span></h1>
+					<a class="btn btn-primary btn-lg" href="/quests/post/<?php $data('quest')('ContentId');?>">Create a new post!</a>
 					<p>Contribute to this story and submit your own post!</p>
 				</header>					
 					<!--
@@ -30,11 +31,11 @@
 					</nav>
 					-->
 					<?php
-					if ( count($quest->Posts) > 0) {
-						foreach ($quest->Posts as $post) {
+					if ( $postCount > 0) {
+						foreach ($quest->posts as $post) {
 						?>
 						<div class="panel panel-default">
-							<div class="panel-heading"><h3 class="panel-title"><?php echo $post->ContentTitle;?></h3></div>
+							<div class="panel-heading"><h3 class="panel-title"><?php $post('ContentTitle');?></h3></div>
 				
 							<div class="panel-body">
 								<div class="media">
@@ -43,36 +44,33 @@
 									Posted By<br />
 										<?php foreach ($post->Characters as $character) {?>
 										
-										<a href="/simm/view/<?php echo $character->ContentId;?>">
-											<img class="media-object" width="128px" src="<?php echo $character->{'Profile Picture'};?>" alt="<?php echo $character->ContentTitle;?>">
-											<?php if ( isset($character->Rank) && isset($character->Rank->ContentTitle)&& isset($character->Rank->Image)) { 
-											$rank = $character->Rank;
-											
-											?>
-											<img class="media-object" width="128px" src="<?php echo $rank->Image;?>" alt="<?php echo $rank->ContentTitle;?>">
+										<a href="/simm/view/<?php $character('ContentId');?>">
+											<img class="media-object" width="128px" src="<?php $character('Profile Picture');?>" alt="<?php $character('ContentTitle');?>">
+											<?php if ( $character->Has('Rank','ContentTitle') && $character->Has('Rank','Image')) {?>
+											<img class="media-object" width="128px" src="<?php $character('rank','Image');?>" alt="<?php $character('rank','ContentTitle');?>">
 											<?php } ?>
-											<?php echo isset($rank->ContentTitle)?$rank->ContentTitle:"";?> <?php echo $character->ContentTitle;?>
+											<?php $character('rank','ContentTitle');?> <?php $character('ContentTitle');?>
 										</a>
 										
 										<?php 
 										} ?>									
 									</div>
 									<div class="media-body">
-										<?php echo $post->ContentDescription;?>
+										<?php $post('ContentDescription');?>
 									</div>
 								</div>
 							</div>
-							<div class="panel-footer">Posted on: <?php echo $post->DateCreated;?></div>
+							<div class="panel-footer">Posted on: <?php $post('DateCreated');?></div>
 						</div>
 						<?php
 						
 						}
 					?>
-					<a class="btn btn-primary btn-lg" href="/quests/post/<?php echo $quest->ContentId;?>">Create a new post!</a>
+					<a class="btn btn-primary btn-lg" href="/quests/post/<?php $quest('ContentId');?>">Create a new post!</a>
 					<?php
 					} else {
 					?>
-					No posts found. <?php if (System::LoggedIn()) {?>Why not <a class="btn btn-primary btn-xs" href="/quests/post/<?php echo $quest->ContentId;?>">Add</a> one?<?php }?>
+					No posts found. <?php if (System::LoggedIn()) {?>Why not <a class="btn btn-primary btn-xs" href="/quests/post/<?php $quest('ContentId');?>">Add</a> one?<?php }?>
 					<?php
 					}
 				?>
