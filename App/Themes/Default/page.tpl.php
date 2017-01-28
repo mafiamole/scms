@@ -22,6 +22,17 @@
 					</div>
 					<div id="navbar" class="navbar-collapse collapse">
 						<ul class="nav navbar-nav">
+                        <?php if ( $data->Has('TopNavigation') ) {
+                                foreach ($data->TopNavigation as $topNav) {
+                                    $hasAccess = in_array($_SESSION['users']->UserGroups,$topNav['UserGroups']);
+                                    if (!$hasAccess) continue; // Skip to the next navigation item!
+                                    $match = $topNav->Match('Active',true,'class="Active"','');
+                        ?>
+                                    <li <?php echo $match;>><a href="<?php $topNav->URL;?>"><?php $topNav->ContentTitle;?></a></li>
+                        <?php
+                                
+                                }
+                            } else { ?>
 							<li class="active"><a href="/">Home</a></li>
 							
 							<!--<li><a href="/characters">Characters</a></li>-->
@@ -29,7 +40,9 @@
 							<li><a href="/quests">Quests</a></li>
 							<?php if (System::LoggedIn()) {?>
 								<li><a href="/users/logout">Logout</a></li>
-							<?php }?>
+							<?php }?>                            
+                        <?php } ?>
+
 						</ul>					
 					</div>
 				</div>
@@ -45,5 +58,6 @@
 		<script src="/Resources/js/jquery-3.1.1.min.js" type="text/javascript"></script>
 		<script src="/Resources/bootstrap-3.3.7-dist/js/bootstrap.min.js" type="text/javascript"></script>	
 		
+        <pre style="display:none;"><?php var_dump($this);?></pre>
 	</body>
 </html>

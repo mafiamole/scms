@@ -1,34 +1,31 @@
-<?php 
-$fields = $this->GetData('fields');
-$character = $this->GetData('character');
-$additionalData = $this->GetData('additionalData');
-?>
+
 				<header class="jumbotron">
-					<h1 class="page-header"><?php echo $this->GetConfig('page_title');?></h1>
+					<h1 class="page-header"><?php $config('page_title');?></h1>
 				</header>				
 				<form class="register-form" action="" method="post" enctype="multipart/form-data">
 					<div class="panel panel-primary">						
 						<article class="panel-body">
 							<label for="name">Name</label>
-							<input class="form-control" type="text" name="Title" value="<?php echo $character->ContentTitle;?>" />				
-							<input type="hidden" name="URL" value="/characters/<?php echo $character->ContentId;?>" />
-							<input type="hidden" name="ContentId" value="<?php echo $character->ContentId;?>" />
-							<input type="hidden" name="ContentLangId" value="<?php echo $character->ContentLangId;?>" />
-							<?php foreach ($fields as $field) {
-								$fieldValue = $character->{$field->Name};
+							<input class="form-control" type="text" name="Title" value="<?php $data('Character','ContentTitle');?>" />				
+							<input type="hidden" name="URL" value="/characters/<?php $data('Character','ContentId');?>" />
+							<input type="hidden" name="ContentId" value="<?php $data('Character','ContentId');?>" />
+							<input type="hidden" name="ContentLangId" value="<?php $data('Character','ContentLangId');?>" />
+							<?php foreach ($data->Fields as $field) {
+                                $fieldName = $field->Name;
+								$fieldType = $field->Type;
 								?>
-								<label for="<?php echo $field->Name;?>"><?php echo $field->Name;?></label>
-								<?php if($field->Type == "Integer") { ?>						
-								<input class="form-control" type="number" name="<?php echo $field->Name;?>" value="<?php echo $fieldValue;?>" />
-								<?php } else if($field->Type == "Content" && $field->TypeData) {
-									$data = $additionalData[$field->TypeData];
+								<label for="<?php $field('Name');?>"><?php $field('Name');?></label>
+								<?php if($field->Match('Type','Integer')) { ?>						
+								<input class="form-control" type="number" name="<?php $field('Name');?>" value="<?php $character($fieldName);?>" />
+								<?php } else if($field->Match('Type','Content' && $fieldType) {
+									$options = $data->Get('additionalData',$fieldType);
 								?>								
-								<select class="form-control" name="<?php echo $field->Name;?>"  >
+								<select class="form-control" name="<?php $field('Name');?>"  >
 								<?php
-									foreach($data as $option) {
+									foreach($options as $option) {
 										$selected = ($option->ContentId == $fieldValue?'selected="selected"':'');
 								?>
-									<option <?php echo $selected;?> value="<?php echo $option->ContentId;?>"><?php echo $option->ContentTitle;?></option>
+									<option <?php echo $selected;?> value="<?php $option('ContentId');?>"><?php $option('ContentTitle');?></option>
 								<?php
 									}
 								?>
@@ -40,9 +37,9 @@ $additionalData = $this->GetData('additionalData');
 								<?php
 								}
 								?>
-								<input class="form-control" type="file" name="<?php echo $field->Name;?>" value="<?php echo $fieldValue;?>" />
+								<input class="form-control" type="file" name="<?php $field('Name');?>" />
 								<?php } else {?>
-								<input class="form-control" type="text" name="<?php echo $field->Name;?>" value="<?php echo $fieldValue;?>" />
+								<input class="form-control" type="text" name="<?php $field('Name');?>" value="<?php $data('character',$fieldName);?>" />
 								<?php } ?>
 							<?php
 							}

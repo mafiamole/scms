@@ -21,6 +21,6 @@ function FindContent($url,$contentList)
 	return false;
 }
 
-$this->data['content'] = FindContent($_SERVER['REQUEST_URI'],$contents);
+$this->data['Content'] = FindContent($_SERVER['REQUEST_URI'],$contents);
 
 $this->ShowView('content.tpl.php');

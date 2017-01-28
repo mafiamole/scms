@@ -1,5 +1,5 @@
 				<header class="jumbotron">
-					<h1 class="page-header"><?php echo $this->GetConfig('page_title');?></h1>
+					<h1 class="page-header"><?php $config('page_title');?></h1>
 				</header>
 				<form class="register-form" action="/users/register" method="post">
 					<div class="panel panel-primary">						

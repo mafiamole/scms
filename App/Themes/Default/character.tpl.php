@@ -2,8 +2,8 @@
 				<?php 
 				//$character = $this->GetData('character');
 				//$fields = $this->GetData('fields');
-				$character 	= $data->Get('character');
-				$fields 	= $data->Get('fields');
+				$character 	= $data->Character;
+				$fields 	= $data->Fields;
 				if ($character) {
 					?>
 					<header class="jumbotron">
@@ -11,7 +11,7 @@
 <?php
 if (isset($_SESSION['user']->Id) && $character->UserId == $_SESSION['user']->Id) {
 ?>
-						<a class="btn btn-primary btn-lg" href="/simm/edit/<?php echo $character->ContentId;?>" class="btn btn-primary" role="button">Edit</a>
+						<a class="btn btn-primary btn-lg" href="/simm/edit/<?php $character('ContentId');?>" class="btn btn-primary" role="button">Edit</a>
 <?php
 }						
 ?>
@@ -19,18 +19,18 @@ if (isset($_SESSION['user']->Id) && $character->UserId == $_SESSION['user']->Id)
 					<div class="media">
 					  <div class="media-left">
 						<a href="#">
-						  <img class="media-object" width="200" src="<?php echo $character->{'Profile Picture'};?>" alt="<?php echo $character->ContentTitle;?>'s profile picture" />
-						  <img class="media-object" style="max-width:200px;" src="<?php echo $character->Rank->Image;?>" alt="<?php echo $character->Rank->ContentTitle;?>" />
+						  <img class="media-object" width="200" src="<?php $character('Profile Picture');?>" alt="<?php $character('ContentTitle');?>'s profile picture" />
+						  <img class="media-object" style="max-width:200px;" src="<?php $character('Rank','Image');?>" alt="<?php $character('Rank','ContentTitle');?>" />
 						</a>
 					  </div>
 					  <div class="media-body">
-						<h4 class="media-heading"><?php echo $character->ContentTitle;?></h4>
+						<h4 class="media-heading"><?php $character('ContentTitle');?></h4>
 						<table class="table">
 						<?php foreach ($fields as $field) { 
-							$fieldName = $field->Name;
+                            $fieldName = $field->Name;
 								if ( is_scalar($character->$fieldName) && !in_array($fieldName,array('Rank','Profile Picture')) ) {
 						?>
-							<tr><th><?php echo $fieldName;?></th><td><?php echo $character->$fieldName;?></td></tr>
+							<tr><th><?php echo $fieldName;?></th><td><?php $character($fieldName);?></td></tr>
 						<?php 
 								}
 							}
