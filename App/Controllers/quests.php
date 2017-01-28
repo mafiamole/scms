@@ -6,6 +6,9 @@ function AddQuest()
 {
 	
 }
+$stories    = LoadModel(Common::LocalDB(),"SimmsModels","Stories");
+$ranks      = LoadModel(Common::LocalDB(),"SimmsModels","Ranks");
+$characters = LoadModel(Common::LocalDB(),"SimmsModels","Characters");
 function GetQuests()
 {
 	$groups = GetGroups();
@@ -21,17 +24,7 @@ function GetQuests()
 	}
 	return $questCats;
 }
-function FindContent($charId,$characters)
-{
-	foreach($characters as $char)
-	{
-		if ( $char->ContentId == $charId )
-		{
-			return $char;
-		}
-	}
-	return false;
-}
+
 function GetRanks()
 {
 	$groups 		= GetGroups();
@@ -39,9 +32,10 @@ function GetRanks()
 	$contents 		= $contentModel->GetContentByType("Rank",$groups);
 	return $contents;
 }
+
 function GetQuest($id)
 {
-	$groups = GetGroups();
+	$groups            = GetGroups();
 	$contentModel		= LoadModel(Common::LocalDB(),"Content","ContentModel");
 	$content = $contentModel->Get($id);
 	$content->Posts =  $contentModel->GetChildItems($content->ContentId,$groups);
@@ -50,7 +44,8 @@ function GetQuest($id)
 	foreach ($content->Posts as $key => $post)
 	{
 		
-		if (isset($post->Characters)) {
+		if (isset($post->Characters))
+        {
 			$characterIds = explode(",",$post->Characters);
 			$content->Posts[$key]->Characters = array();
 			foreach($characterIds as $char)
@@ -64,7 +59,7 @@ function GetQuest($id)
 				}
 			}
 		}
-		else 
+		else
 		{
 			$post->Characters = array();
 		}
@@ -105,7 +100,7 @@ function AddPost($post,$questId)
 		
 		$post['Users_id'] 			= $_SESSION['user']->Id;
 		$post['ContentTypes_id'] 	= $contentType->Id;
-		$post['Applications_AppId'] 	= 1;
+		$post['Applications_AppId'] = 1;
 		$post['Languages_id']		= $_SESSION['user']->Languages_id;
 		$post['Keywords'] 			= "";
 		
@@ -125,7 +120,6 @@ function AddPost($post,$questId)
 		$contentLangId = $contentLangModel->Add($post);
 		header("location:/quests/view/".$questId);
 	}
-	
 }
 
 $view = null;
@@ -171,16 +165,20 @@ switch ( $function ) {
 				{
 					$this->data['PostData']['UsersCharacters'][] = $character * 1;
 				}
-			} else {
+			}
+            else
+            {
 				$postErr['UsersCharacters'] = 'No user characters selected';
 			}
-			if ( isset($_POST['OthersCharacters']) && count($_POST['OthersCharacters']) > 0  ) {
+			if ( isset($_POST['OthersCharacters']) && count($_POST['OthersCharacters']) > 0  )
+            {
 				foreach ( $_POST['OthersCharacters'] as $character ) 
 				{
 					$this->data['PostData']['OthersCharacters'][] = $character * 1;
 				}				
-			}	
-			if ( AddPost($this->data['PostData'],$qID) ) {
+            }
+            $success = $stories->Add($this->Data['PostData'],$qID)
+			if ( $success ) {
 				header("locations:/quests/view/".$qID);
 			}			
 		}
@@ -191,7 +189,7 @@ switch ( $function ) {
 	case "view":		
 		$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);
 		$qID = $parameter2;
-		$quest = GetQuest($qID);
+		$quest = $stories->GetCategories($qID);
 		$this->data['Quest'] = $quest;
 		if ($quest != null)
         {			
@@ -202,7 +200,7 @@ switch ( $function ) {
 	break;
 	default:
 		$config['page_title'] = "Quests";
-		$this->data['QuestCategories'] = GetQuests();
+		$this->data['QuestCategories'] = $stories->GetAll();
         
 		$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);
 		echo $contentView->show('quests.tpl.php');
