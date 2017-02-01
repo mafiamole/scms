@@ -383,7 +383,7 @@ class ContentModel implements \IModel
 		$groupIds = array($content->UserGroupId);
 				
 		$contentData = $contentDataModel->GetContentDataByContentId($content->ContentId,$groupIds);
-		
+
 		foreach ($contentData as $cd) {
 			if ( !array_key_exists($cd->Name,$content) ) {
 				$key = $cd->Name;

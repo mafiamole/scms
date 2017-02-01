@@ -5,7 +5,8 @@ $parameter2 = $parameters->Get(2);
 
 $contentModel=LoadModel(Common::LocalDB(),"Content","ContentModel");
 
-switch ($parameter1) {
+switch ($parameter1)
+{
 	case "create":
 		
 		$this->config['page_title'] = "Create a new Character";

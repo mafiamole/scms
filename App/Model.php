@@ -17,6 +17,8 @@ function FileUpload($directoryFolder,$targetKey,$expectedType,$sizeLimit = 50000
 	}
 	$file = $_FILES[$key];
 	$fileURL = $directoryFolder . basename($file["name"]);
+	if (strlen($file["tmp_name"]) == 0)
+		return;
 	$targetFile = getcwd(). $fileURL;
 	$extension = pathinfo($targetFile,PATHINFO_EXTENSION);
 	$directory = pathinfo($targetFile,PATHINFO_DIRNAME);

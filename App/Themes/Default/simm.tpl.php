@@ -1,6 +1,6 @@
 
 				<header class="jumbotron">
-					<h1 class="page-header"><?php echo $this->GetConfig('page_title');?></h1>
+					<h1 class="page-header"><?php echo $config('page_title');?></h1>
 					<p>
 						<a href="<?php echo $_SERVER['REQUEST_URI'];?>/create/" class="btn btn-primary btn-lg" role="button">Create Character »</a>
 					</p>					

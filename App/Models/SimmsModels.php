@@ -1,4 +1,5 @@
 <?php
+namespace Models;
 function FindContent($id,$data)
 {
     foreach($data as $d)
@@ -19,47 +20,94 @@ class SimpleContent
 	protected $ctm;
 	protected $ctfm;
 
-	public function __Construct($name)
+	public function __Construct($db,$name)
 	{
+		$this->db				= $db;
         $this->name             = $name;
-		$this->cModel		    = LoadModel(Common::LocalDB(),"Content","ContentModel");
-		$this->cLangModel      	= LoadModel(Common::LocalDB(),"Content","ContentLangModel");
-		$this->ctm 				= LoadModel(Common::LocalDB(),"Content","ContentTypesModel");
-		$this->contentDataModel = LoadModel(Common::LocalDB(),"Content","ContentDataModel");
-		$this->ctfm             = LoadModel(Common::LocalDB(),"Content","ContentTypeFieldsModel");
+		$this->cModel		    = LoadModel(\Common::LocalDB(),"Content","ContentModel");
+		$this->cLangModel      	= LoadModel(\Common::LocalDB(),"Content","ContentLangModel");
+		$this->ctm 				= LoadModel(\Common::LocalDB(),"Content","ContentTypesModel");
+		$this->contentDataModel = LoadModel(\Common::LocalDB(),"Content","ContentDataModel");
+		$this->ctfm             = LoadModel(\Common::LocalDB(),"Content","ContentTypeFieldsModel");
 	}
     public function Get($id)
     {
-        return $this->cModel->Get($id);
+        $data =  $this->cModel->Get($id);
+		
+		return $data;
     }
+
 	public function GetType($type = null)
     {
-        $type = ($type?$type:$this->Name);
+        $type = ($type?$type:$this->name);
         return $this->ctm->Get($type);
     }
+
+	public function GetContentFieldOptions()
+	{
+		$options = array();
+		$fields = $this->GetFields();
+		$groups = GetGroups();
+		foreach ($fields as $field)
+		{
+			if ( strtolower($field->Type) == "content")
+			{						
+				$subData 					= $this->cModel->GetContentByTypeId($field->TypeData,$groups);
+				$options[$field->TypeData] 	= $subData;
+			}
+		}
+		return $options;
+	}
+	/**
+	 *	Fetches the content for properties that are content
+	 *
+	 *
+	 **/
+	public function GetContentData($data)
+	{
+		foreach ($this->GetFields() as $field)
+		{
+			if ( strtolower($field->Type) == "content")
+			{
+				$property = $field->Name;
+				if ( property_exists($data,$property) && $data->$property != null && $data->$property > 0 )
+				{
+					$fieldData = $this->cModel->Get($data->$property);
+					$data->$property = $fieldData;
+				}				
+			}				
+		}
+		return $data;
+	}
     public function GetFields()
     {
-        return $this->ctfm->GetContentTypeFieldsByName($this->Name);        
+        return $this->ctfm->GetContentTypeFieldsByName($this->name);        
     }
 }
 
 class Stories extends SimpleContent
 {
-	public function __Construct($name="Stories")
+	public function __Construct($db,$name="Story")
 	{
-        parent::__Construct($name);
+        parent::__Construct($db,$name);
 	}
 
     public function Get($id)
     {
-        $story = $cModel->Get($id);
+        $story = $this->cModel->Get($id);
         
     }
 
     public function GetAll()
     {
         $groups     = GetGroups();
-        return $this->cmodel->GetContentByType($this->name,$groups);
+        $cats = $this->cModel->GetContentByType("StoryCategory",$groups);
+		foreach ($cats as $catKey => $cat)
+		{
+			$catStories = $this->cModel->GetChildItems($cat->ContentId,$groups);
+			$cats[$catKey]->Stories = $catStories;
+		}
+		return $cats;
     }
 
     public function GetPosts($questId)
@@ -146,27 +194,27 @@ class Stories extends SimpleContent
 
 class Simm extends SimpleContent
 {
-	public function __Construct($name="PositionGroup")
+	public function __Construct($db,$name="PositionGroup")
 	{
-        parent::__Construct($name);
+        parent::__Construct($db,$name);
 	}
     public function Manifest()
     {
         $groups = GetGroups();
-        $positionGroupsData = $this->cmodel->GetContentByType($this->name,$groups);
+        $positionGroupsData = $this->cModel->GetContentByType($this->name,$groups);
         foreach ($positionGroupsData as $key => $pg) {
             $positionGroupsData[$key]->Positions = array();
-            $positions = $this->cmodel->GetChildItems($pg->ContentId,$groups);
+            $positions = $this->cModel->GetChildItems($pg->ContentId,$groups);
 
             foreach ( $positions as $key2 => $pos)
             {
                 if ( isset($pos->Character) && $pos->Character && ($pos->Character*1) > 0 )
                 {
-                    $character = $this->cmodel->Get($pos->Character*1);
+                    $character = $this->cModel->Get($pos->Character*1);
                     if ($character) {
                         //$positionGroupsData[$key]->Positions[$key] = new stdclass();
-                        $canEdit = (System::LoggedIn() && $_SESSION['user']->Id == $character->UserId);
-                        $character->Rank = $this->cmodel->Get($character->Rank);
+                        $canEdit = (\System::LoggedIn() && $_SESSION['user']->Id == $character->UserId);
+                        $character->Rank = $this->cModel->Get($character->Rank);
                         $character->CanEdit = $canEdit;
                         $positions[$key2]->Character = $character;
                     } else {
@@ -190,35 +238,28 @@ class Simm extends SimpleContent
 
 class Ranks extends SimpleContent
 {
-	public function __Construct($name="Ranks")
+	public function __Construct($db,$name="Ranks")
 	{
-        parent::__Construct($name);
+        parent::__Construct($db,$name);
 	}    
 }
 
 class Characters extends SimpleContent
 {
-	public function __Construct($name="Character")
+	public function __Construct($db,$name="Character")
 	{
-        parent::__Construct($name);
+        parent::__Construct($db,$name);
 	}
 	public function Get($id)
 	{        
         $character = parent::Get($id);
-        if ($character->Rank && $character->Rank > 0) 
-        {
-            $character->Rank = $this->cModel->Get($character->Rank);
-        }
-        else
-        {
-            $character->Rank = null;
-        }
+        $character = $this->GetContentData($character);
         return $character;		
 	}
-    
 	public function Add($data)
 	{
-        if (!$_SESSION['user']->Id)
+		
+        if (!(isset($_SESSION['user']) && isset($_SESSION['user']->Id)))
         {
             return false;
         }
@@ -229,7 +270,7 @@ class Characters extends SimpleContent
         $data['ContentTypes_id']        = $characterType->Id;
         $data['Users_id']               = $_SESSION['user']->Id * 1;
         $data['Applications_AppId']     = 1;
-        $contentId                      = $contentModel->Add($data);
+        $contentId                      = $this->cModel->Add($data);
         $data['Content_id']             = $contentId;
         $data['Languages_id']           = $_SESSION['user']->Languages_id * 1;
         $data['Keywords']               = "";
@@ -238,13 +279,13 @@ class Characters extends SimpleContent
         {
             $data[str_replace("_"," ",$key)] = $value;
         }
-        $contentLangId = $contentLangModel->Add($data);
+        $contentLangId = $this->cLangModel->Add($data);
 
 
         $positionData                   = array();
         $positionData['Status']         = "Closed";
         $positionData['Character']      = $contentId;
-        $success = $contentDataModel->EditAllContentData($positionData,$data['Position']*1,$groups);
+        $success = $this->contentDataModel->EditAllContentData($positionData,$data['Position']*1,$groups);
         return $contentId;
 	}
 	public function Edit($data)
@@ -262,7 +303,7 @@ class Characters extends SimpleContent
         $data['Users_id'] 			   = $_SESSION['user']->Id;
         $data['Applications_AppId']    = 1;
         $data['Id']                    = $data['ContentId'];
-        $contentId                     = $contentModel->Edit($data);
+        $contentId                     = $this->cModel->Edit($data);
         $data['Id']                    = $data['ContentLangId'];
         $data['Content_id']            = $data['ContentId']*1;
         $data['Languages_id']          = $_SESSION['user']->Languages_id *1;
@@ -273,11 +314,11 @@ class Characters extends SimpleContent
             $data[str_replace("_"," ",$key)] = $value;
         }
         try {
-            $contentLangId                  = $contentLangModel->Edit($data,$groups);
+            $contentLangId                  = $this->cLangModel->Edit($data,$groups);
             $positionData                   = array();
             $positionData['Status']         = "Closed";
             $positionData['Character']      = $contentId;
-            $success                        = $contentDataModel->EditAllContentData($positionData,$data['Position']*1,$groups);
+            $success                        = $this->contentDataModel->EditAllContentData($positionData,$data['Position']*1,$groups);
         } catch(Exception $exception) {
 
         }

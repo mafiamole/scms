@@ -262,8 +262,8 @@ class UsersModel implements \IModel
 	protected $db;
 	protected $app;
 	protected $dbHelper;
-	
-	public function __construct($db,$app)
+	// TODO: $app
+	public function __construct($db,$app ="abc")
 	{
 		$this->db = $db;
 		$this->app = $app;
@@ -383,10 +383,13 @@ class UsersModel implements \IModel
 		$query			= "SELECT * FROM users WHERE `Email` = ?";
 		$prepQry 		= $this->db->prepare($query);
 		$prepQry->execute(array($email));
-		
+		Debug($email);
 		$user = $prepQry->fetch(\PDO::FETCH_OBJ);
-        if (!$user)
+		
+        if (!$user) {
+			Debug($prepQry->ErrorInfo());
             return false;
+		}
 		$userDataTypes = new UserDataModel($this->db,$this->app);
 		$extraData = $userDataTypes->GetUsersData($user->Id);
 		if ($extraData) {

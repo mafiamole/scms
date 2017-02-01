@@ -12,7 +12,7 @@ class AppError
     public function __construct()
     {
         $args = func_get_args();
-        if (count($args) == 1 && $args[0] instanceof Exception)
+        if (count($args) == 1 && ($args[0] instanceof Error || $args[0] instanceof Exception))
         {
             $this->fromException($args[0]);
         }
@@ -32,7 +32,7 @@ class AppError
             $this->date = date('N');            
         }
     }
-    protected function fromException(Exception $ex)
+    protected function fromException($ex)
     {
         $this->header = get_class($ex). " was thrown.";
         $this->footer = "File: ".$ex->getFile() . " Line: ". $ex->getLine();
@@ -76,6 +76,7 @@ class AppError
 }
 function SendErrorEmail(AppError $err)
 {
+	
     $template=
         '
         An error has occurred on the website.<br />
@@ -97,6 +98,30 @@ function SendErrorEmail(AppError $err)
 }
 function ShowError(AppError $err)
 {
+	$stackTrace = debug_backtrace();
+	$st = "";
+	$template = '
+	<div class="container-fluid">
+		<div class="row">
+			%s(%s) in %s Argument data:
+			<div class="btn pull-right" data-toggle="collapse" data-target="%s" aria-expanded="false" aria-controls="manifest">
+				<span class="caret"></span>
+				<span class="sr-only">Toggle error args</span>
+			</div>
+			<div id="%s" class="collapse" ><pre>(%s)</pre></div>
+		</div>
+	</div>
+	';
+	foreach ($stackTrace as $line)
+	{
+		$refID = uniqid("err");
+		$file = array_key_exists('file',$line)?$line['file']:'';
+		$l = array_key_exists('line',$line)?$line['line']:'';
+		$function = array_key_exists('function',$line)?$line['function']:'';
+		$args = array_key_exists('args',$line)?print_r($line['args'],true):'';
+		$st .= sprintf($template,$file,$l,$function,"#{$refID}",$refID,$args);
+	}
+		
     printf('
 <!DOCTYPE html>
 <html lang="en">
@@ -115,7 +140,7 @@ function ShowError(AppError $err)
     {
         $template = 
         '
-            <div class="panel panel-danger">
+            <div class="panel panel-danger" style="margin-top:70px;">
                 <div class="panel-heading">%s</div>
                 <div class="panel-body">
                 %s
@@ -124,7 +149,7 @@ function ShowError(AppError $err)
                 <div class="panel-footer">%s</div>
             </div>
         ';
-        printf($template,$err->getHeader(),$err->getBody(),$err->getFooter());        
+        printf($template,$err->getHeader(),$err->getBody() . "<br />\n".$st."",$err->getFooter());        
     }
     else
     {
@@ -173,26 +198,25 @@ function ErrorHandeler($errno, $errstr, $errfile, $errline)
 $old_exception_handler = set_exception_handler("ExceptionHandeler");
 $old_error_handler = set_error_handler("ErrorHandeler");
 
+$data = array();
+$config = array();
+
+
 $defaults 						= array();
 $defaults['site_title'] 		= 'Site Title';
 $defaults['page_title'] 		= 'Page Title';
 $defaults['site_slogan'] 		= 'Site Slogan goes here';
 $defaults['html_title_format'] 	= '%s - %s';
 $defaults['page_content'] 		= 'Page content not found';
-
-$data = array();
-$config = array();
+$defaults['theme']				= 'Default';
 
 require_once(APP_FOLDER . "app.config.php");
+
+$config = array_replace_recursive($defaults,$config);
+
 require_once(APP_FOLDER . "view.php");
 require_once(APP_FOLDER . "Controller.php");
-$theme = "Default";
 
-$data['pageController'] = SearchControllerMaps(
-							$controllerMap,
-							$_SERVER['REQUEST_URI'],
-							new ControllerMap('/',"content",array())
-						);
 
 function SetLoggedOutGroups()
 {
@@ -203,17 +227,22 @@ function SetLoggedOutGroups()
 		$_SESSION['user']->groups = $groups;
 	}
 }
-function GetURIS($path) {
+function GetURIS($path)
+{
 	$getParamsStart = strrpos($path,"?");
-	if ($getParamsStart > 0 ) {
+	if ($getParamsStart > 0 )
+	{
 		$pathWOGet = substr($_SERVER['REQUEST_URI'],0,$getParamsStart);
-	} else {
+	}
+	else
+	{
 		$pathWOGet = $path;
 	}
 	$output = array();
 	foreach (explode("/", $pathWOGet) as $uri)
 	{
-		if ( $uri && strlen($uri) > 0 ) {
+		if ( $uri && strlen($uri) > 0 )
+		{
 			$output[] = $uri;
 		}
 	}
@@ -221,27 +250,39 @@ function GetURIS($path) {
 }
 
 
+
 SetLoggedOutGroups();
 $parameters = GetURIS($_SERVER['REQUEST_URI']);
 $data['parameters'] = $parameters;
+if (isset($parameters[0]) && strtolower($parameters[0]) == "admin")
+{
+	require_once("admin.php");
+	exit;
+}
+$data['pageController'] = SearchControllerMaps(
+							$controllerMap,
+							$_SERVER['REQUEST_URI'],
+							new ControllerMap('/',"content",array())
+						);
+
 $data['TopNavigation'] = array
 (
     array('ContentTitle'=>'Home','URL'=>'/','UserGroups'=>array('Id'=>1,2,3)),
     array('ContentTitle'=>'Simm','URL'=>'/simm','UserGroups'=>array('Id'=>1,2,3)),
-    array('ContentTitle'=>'Stories','URL'=>'/quests','UserGroups'=>array('Id'=>1,2,3)),
-    array('ContentTitle'=>'Login','URL'=>'/users/login','UserGroups'=>array('Id'=>2,3)),
-    array('ContentTitle'=>'Register','URL'=>'/users/register','UserGroups'=>array('Id'=>2,3)),
-    array('ContentTitle'=>'Logout','URL'=>'/users/logout','UserGroups'=>array('Id'=>1))
+    array('ContentTitle'=>'Stories','URL'=>'/stories','UserGroups'=>array('Id'=>1,2,3)),
+    array('ContentTitle'=>'Login','URL'=>'/users/login','UserGroups'=>array('Id'=>1)),
+    array('ContentTitle'=>'Register','URL'=>'/users/register','UserGroups'=>array('Id'=>1)),
+    array('ContentTitle'=>'Logout','URL'=>'/users/logout','UserGroups'=>array('Id'=>2,3))
 );
 foreach ($data['TopNavigation'] as $key => $tn)
 {
-    $regex = "#^".preg_quote($tn->URL)."#";
+	
+    $regex = "#^".preg_quote($tn['URL'])."#";
     if (preg_match($regex,$_SERVER['REQUEST_URI']) !== false )
     {
         $data['TopNavigation'][$key]['Active'] = true;
     }
 }
-
-$page = new PageView($theme,$defaults,$data,$config);
+$page = new PageView($config['theme'],$data,$config);
 
 echo $page->show('page.tpl.php');

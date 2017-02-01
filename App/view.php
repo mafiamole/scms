@@ -9,9 +9,9 @@ class ViewData implements Iterator
 {
 	protected $data = array();
 	protected $showErrors = false;
-	public function __construct(array $data,array $defaults,bool $showErrors = false)
+	public function __construct(array $data,bool $showErrors = false)
 	{
-		$this->data = array_replace_recursive($defaults,$data);
+		$this->data = $data;
 		$this->showErrors = $showErrors;
 	}
 	/**
@@ -59,7 +59,7 @@ class ViewData implements Iterator
         try
         {
             $key = $this->ProcessArguments($key);
-            $value = $this->GetValue($key);
+            $value = $this->GetValue(array($key));
             return ($value == $toMatch)?$true:$false;
 		}
 		catch (Exception $exception)
@@ -124,7 +124,8 @@ class ViewData implements Iterator
 	public function Has($key)
 	{
         try{
-            return arrHas($keys,$this->data);
+			return array_key_exists($key,$this->data);
+           // return $this->arrHas(array($key),$this->data);
 		}
 		catch (Exception $exception)
 		{
@@ -134,35 +135,35 @@ class ViewData implements Iterator
     // { Iterator methods
     public function rewind()
     {
-        reset($this->var);
+        reset($this->data);
     }
   
     public function current()
     {
-        $var = current($this->var);
-        return WrapReturnValue($var);
+        $var = current($this->data);
+        return $this->WrapReturnValue($var);
     }
   
     public function key() 
     {
-        $var = key($this->var);
+        $var = key($this->data);
         return $var;
     }
   
     public function next() 
     {
-        $var = next($this->var);
+        $var = next($this->data);
         return $var;
     }
   
     public function valid()
     {
-        $key = key($this->var);
+        $key = key($this->data);
         $var = ($key !== NULL && $key !== FALSE);
         return $var;
     }
      // }
-	protected function GetValue(array $keys)
+	protected function GetValue($keys)
 	{
 		$value = "";
 		$value = $this->fetch($keys,$this->data);        
@@ -173,7 +174,7 @@ class ViewData implements Iterator
 	{
 		
 		if (is_scalar($retValue) || $retValue instanceof ViewData) return $retValue;
-		else return new ViewData((array)$retValue,array(),$this->showErrors);
+		else return new ViewData((array)$retValue,$this->showErrors);
 	}
 	protected function WrapArray($arr)
 	{
@@ -184,7 +185,7 @@ class ViewData implements Iterator
 		}
 		return $returnData;		
 	}
-    protected function ProcessArguments(array $args)
+    protected function ProcessArguments($args)
     {
         if (!is_array($args)) return $args;
         
@@ -196,16 +197,17 @@ class ViewData implements Iterator
     }
 
     protected function arrHas($keys,$arr)
-    {
-        $args = ProcessArguments(func_get_args());
+    {	
+        $args = $this->ProcessArguments(func_get_args());
         if (count($args) == 1) return array_key_exists($args[0],$arr);
-		return $this->fetchIterative($args) !== false;        
+		return $this->fetchIterative($keys,$args) !== false;        
     }
+
     protected function fetch($keys,$arr)
     {
         if(count($keys) == 1)
         {
-            $arr = extractValue($key,$arr);
+            $arr = $this->extractValue($keys[0],$arr);
             if ( $arr === false ) return ($this->showErrors?"Key $key does not exist":"");
             else return $arr;        
         }
@@ -215,17 +217,18 @@ class ViewData implements Iterator
         }
         else
         {
-            $value = $fetchIterative($key,$arr);
+            $value = $this->fetchIterative($keys,$arr);
             if (!$value) return ($this->showErrors?"Key $key does not exist":"");
             return $value;
         }
         return false;
     }
+	
     protected function fetchIterative($keys,$arr)
     {
         foreach($keys as $key)
         {
-            $arr = extractValue($key,$arr);
+            $arr = $this->extractValue($key,$arr);
             if (!$arr) return false;
         }
         return $arr;
@@ -236,7 +239,7 @@ class ViewData implements Iterator
         {
             $arr = $arr[$key];
         }
-        else if ( is_object($arr) && property_exists($key,$arr))
+        else if ( is_object($arr) && property_exists($arr,$key))
         {
             $arr = $arr->$key;
         }
@@ -253,17 +256,15 @@ class ViewData implements Iterator
 class View {
 	
 	protected $theme;
-	protected $defaults;
 	protected $data;
 	protected $config;
     protected $errors;
 	
-	public function __construct($theme,$default,$data,$config) {
+	public function __construct($theme,$data,$config) {
 		$this->theme	= $theme;
-		$this->defaults = $default;
-        $this->data     = $this->initaliseDataObject($data,$default);
-        $this->config   = $this->initaliseDataObject($config,$default);
-        $this->$errors  = $this->initaliseDataObject(array(),array());
+        $this->data     = $this->initaliseDataObject($data);
+        $this->config   = $this->initaliseDataObject($config);
+        $this->errors  	= $this->initaliseDataObject(array());
     }
 
 	public function Show($template) {
@@ -301,7 +302,7 @@ class View {
 	}
 	public function CreateSubView()
 	{
-		return new View($this->theme,$this->defaults,$this->data,$this->config);
+		return new View($this->theme,$this->data,$this->config);
 	}
 	public function ShowView($template)
 	{
@@ -309,27 +310,27 @@ class View {
 		$data = $this->data;
 		echo $view->Show($template);		
 	}
-	protected function initaliseDataObject($data,$defaults)
+	protected function initaliseDataObject($data)
     {
- 		if ( is_array($config) )
+ 		if ( is_array($data) )
 		{
-			return new ViewData($config,$default);
+			return new ViewData($data);
 		}
-		else if ( $config instanceof ViewData )
+		else if ( $data instanceof ViewData )
 		{
-			return $config;
+			return $data;
 		}
 		else
 		{
-			throw new Exception('Invalid Config structure');
+			throw new Exception('Invalid Data structure');
 		}       
     }    
 }
 // Specialised view for the whole page :D
 class PageView extends View
 {
-	public function __construct($theme,$default,$data,$config) {
-		parent::__construct($theme,$default,$data,$config);
+	public function __construct($theme,$data,$config) {
+		parent::__construct($theme,$data,$config);
 		
 	}
 	protected function FormatTitle() {

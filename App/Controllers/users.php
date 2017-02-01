@@ -2,50 +2,49 @@
 require(APP_FOLDER . "/ThirdParty/password.php");
 require(APP_FOLDER . "/Helpers/Validator.php");
 
-$parameter1 = $parameters->Get(1);
-$parameter2 = $parameters->Get(2);
-
-$isPost = (isset($_POST) && !empty($_POST));
-
-$this->data['PostData'] = array();
-
 function Login() {
-	
 	$sanitizer = new Sanitize($_POST);
-	$email = $sanitizer->CheckEmail('email');
+	$email = $sanitizer->CheckEmail('Email');
 	$db = Common::LocalDB();
 	$model = LoadModel($db,'Users','UsersModel');
 	$user = $model->FindExistingByEmail($email);
     if (!$user) {
-        return array('email'=>"User not found");
+        return array('Email'=>"User not found");
     }
-	$validPassword =  password_verify($_POST['password'],$user->Password);
-	if ( $validPassword ) {
+	$validPassword =  password_verify($_POST['Password'],$user->Password);
+	if ( $validPassword ) 
+	{
 		// Set up session
 		$_SESSION['user'] = array();
 		$_SESSION['user'] = $user;
-		$setLastLogin = array(
+		$setLastLogin = array
+		(
 			'Id' 		=> $user->Id,
 			'LastLogin' => date('c')
 		);
 		$model->Edit($setLastLogin);
 		header('location:/users/loggedIn');
 		return true;
-	} else {
+	}
+	else
+	{
 		
 		$errors = $sanitizer->GetErrors();
 		$errors['password'] = "Incorrect password";
 		return $errors;
 	}
 }
-switch ( strtolower($parameter1) ) {
-	case "register":
-		$config['page_title'] 						= "Register";
-		$this->data['PostData']['Email'] 			= "";
-		$this->data['PostData']['Password'] 		= "";
-		$this->data['PostData']['ConfirmPassword'] 	= "";
-        $postErrors = array();
-		if ($isPost) {
+
+$controller = new Controller('/users',$this->data,$this->config,$this->theme);
+
+$controller->Add
+(
+	REQUEST_POST,
+	'/register',
+	function($controller,$route,$parameters,$models)
+	{
+        if ( !empty($_POST) )
+        {
 			$sanitizer = new Sanitize($_POST);
 			$this->data['PostData']['Email'] 	= $sanitizer->CheckEmail('email');
 			$this->data['PostData']['Password'] = $sanitizer->CheckRegPassword('password','confirmPassword');
@@ -62,7 +61,8 @@ switch ( strtolower($parameter1) ) {
 
 			$postErrors = $sanitizer->GetErrors();
             
-			if ( $this->errors->Count('Post') == 0) {
+			if ( $this->errors->Count('Post') == 0)
+			{
 				$user = $model->Add(array(
 					'Email'=>$this->data['postData']['email'],
 					'Password'=>$this->data['postData']['password'],
@@ -81,43 +81,102 @@ switch ( strtolower($parameter1) ) {
 					$postErrors['Email'] = "Unable to add user";
 				}
 			}
-		}
+        }		
+	}
+);
+$controller->Add
+(
+	REQUEST_POST,
+	'/login',
+	function($controller,$route,$parameters,$models)
+	{
+		$err = Login();
+		$controller->AddData('errors',$err);
+	}
+);
+
+$controller->Add
+(
+	REQUEST_GET | REQUEST_POST,
+	'/register',
+	function($controller,$route,$parameters,$models)
+	{
+		$this->config['page_title'] 				= "Register";
+		$this->data['PostData']['Email'] 			= "";
+		$this->data['PostData']['Password'] 		= "";
+		$this->data['PostData']['ConfirmPassword'] 	= "";
+        $postErrors = array();
+
         $this->errors->Add('Post',$postErrors);
-		$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);
+		$contentView = $controller->CreateView();
 		echo $contentView->show('register.tpl.php');
-	break;
-	case "registrationComplete":
+	}
+);
+$controller->Add
+(
+	REQUEST_GET,
+	'/registrationcomplete',
+	function($controller,$route,$parameters,$models)
+	{
 		$config['page_title'] = "Register";
-		$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);
-		echo $contentView->show('registrationComplete.tpl.php');	
-	break;
-	case "view":
-		$config['page_title'] = "Users";
-		$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);
-		echo $contentView->show('user.tpl.php');
-	break;
-	case "login":
-		$config['page_title'] = "Login";		
-		if ( !empty($_POST) ) {
-			// process login
-			$err = Login();
-            $this->errors->Add('Post',$err);
-		}
-		$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);
-		echo $contentView->show('login.tpl.php');
-	break;
-	case "logout":
+		$contentView = $controller->CreateView();
+		echo $contentView->show('registrationComplete.tpl.php');		
+	}
+);
+$controller->Add
+(
+	REQUEST_GET,
+	'/view',
+	function($controller,$route,$parameters,$models)
+	{
+		$this->config['page_title'] = "Users";
+		$contentView = $controller->CreateView();
+		echo $contentView->show('user.tpl.php');		
+	}
+);
+$controller->Add
+(
+	REQUEST_GET | REQUEST_POST,
+	'/login',
+	function($controller,$route,$parameters,$models)
+	{
+		
+		$this->config->Add('page_title',"Login");
+		$contentView = $controller->CreateView();
+		echo $contentView->show('login.tpl.php');		
+	}
+);
+$controller->Add
+(
+	REQUEST_GET | REQUEST_POST,
+	'/logout',
+	function($controller,$route,$parameters,$models)
+	{
 		unset($_SESSION['user']);
 		SetLoggedOutGroups();
 		header("location:/users/login");
-	case "loggedIn":
-		$config['page_title'] = "Login";
-		$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);
-		echo $contentView->show('loginComplete.tpl.php');		
-	break;
-	default:
-		$config['page_title'] = "Users";
-		$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);
+	}
+);
+$controller->Add
+(
+	REQUEST_GET | REQUEST_POST,
+	'/loggedin',
+	function($controller,$route,$parameters,$models)
+	{
+		$this->config->Add('page_title',"Login");
+		$contentView = $controller->CreateView();
+		echo $contentView->show('loginComplete.tpl.php');
+	}
+);
+$controller->Add
+(
+	REQUEST_GET | REQUEST_POST,
+	'/$',
+	function($controller,$route,$parameters,$models)
+	{
+		$this->config->Add('page_title',"Users");
+		$contentView = new View($this->theme,$this->data,$this->config);
 		echo $contentView->show('users.tpl.php');
-	break;	
-}
+	}
+);
+$controller->Run($_SERVER['REQUEST_URI'],CheckRequestMethod());

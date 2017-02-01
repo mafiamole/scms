@@ -26,12 +26,17 @@ if (isset($_SESSION['user']->Id) && $character->UserId == $_SESSION['user']->Id)
 					  <div class="media-body">
 						<h4 class="media-heading"><?php $character('ContentTitle');?></h4>
 						<table class="table">
-						<?php foreach ($fields as $field) { 
-                            $fieldName = $field->Name;
+						<?php foreach ($fields as $field)
+							{ 
+								$fieldName = $field->Name;
 								if ( is_scalar($character->$fieldName) && !in_array($fieldName,array('Rank','Profile Picture')) ) {
 						?>
 							<tr><th><?php echo $fieldName;?></th><td><?php $character($fieldName);?></td></tr>
 						<?php 
+								} else if ( $fieldName == "Position" ) {
+						?>
+							<tr><th><?php echo $fieldName;?></th><td><?php $character($fieldName,'ContentTitle');?></td></tr>
+						<?php
 								}
 							}
 						?>
