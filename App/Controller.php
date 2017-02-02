@@ -14,17 +14,20 @@ class ControllerMap
 	}
 	public function MatchURL($url)
 	{
-		if ( $this->URL == "/" ) {
+		if ( $this->URL == "/" )
+		{
 			return $url == "/";
 		}
-		$quotedURL = preg_quote($this->URL,"/");
-		$patternMatch = '/^'.$quotedURL."[0-9a-zA-Z\/]*/";
-		$matched = preg_match($patternMatch,$url);
+		$quotedURL 		= preg_quote($this->URL,"/");
+		$patternMatch 	= '/^'.$quotedURL."[0-9a-zA-Z\/]*/";
+		$matched 		= preg_match($patternMatch,$url);
 		//echo "{$patternMatch} = {$url} ? {$matched} <br />\n";
 		return $matched == 1;
 	}
 }
+
 DEFINE('REQUEST_GET',1);
+
 DEFINE('REQUEST_POST',2);
 
 function GetRequestMethodMask()
@@ -49,17 +52,16 @@ function CheckRequestMethod()
 	return $requestMethod;
 }
 
-
-
 function TrimForwardSlashes($value) { return trim($value,'/'); }
 
 function PathCombine($paths)
 {
 	$args = func_get_args();
 	$pathItems = array_map('TrimForwardSlashes',$args);
-	$newPath = rtrim('/'.join('/',$pathItems),'/');
+	$newPath = '/'.trim('/'.join('/',$pathItems),'/');
 	return $newPath;
 }
+
 class Route
 {
 	protected $httpMethods;
@@ -83,33 +85,31 @@ class Route
 		$matches 		= array();
 		$urlMatch 		= preg_match('#'.$this->url.'#',$url,$matches);
 		$requestMethod 	= (( $this->httpMethods & $requestMethods) == $requestMethods);
-		//Debug("URL MATCH {$expr} = {$url} ? {$urlMatch} | {$requestMethods} && {$this->httpMethods} = {$requestMethod}");
 		if ($urlMatch && $requestMethod)
 		{
-			$fn =$this->fn;
+			
+			$fn = $this->fn;
 			$fn($this->controller,$this,$matches,$this->controller->GetModels());
 		}
 	}
 }
+
 class Controller
 {
 	protected $routes;
 	protected $rootURL;
 	protected $data;
 	protected $config;
-	protected $defaults;
-	protected $theme;
 	protected $models;
 	
-	public function __construct($rootURL,$data =array(),$config = array(),$defaults = array(),$theme = "default")
+	public function __construct($rootURL,$data =array(),$config = array())
 	{
 		$this->routes 	= array();
 		$this->rootURL 	= $rootURL;
 		$this->data 	= $data;
 		$this->config 	= $config;
-		$this->defaults = $defaults;
-		$this->theme 	= $theme;
 		$this->models	= array();
+		$this->errors	= array();
 	}	
 	public function Add($httpMethod,$urlExpr,$fn)
 	{
@@ -131,17 +131,47 @@ class Controller
 	{
 		return $this->models;
 	}
+	public function Initiate($controllerFileName)
+	{
+		$parameters = array_key_exists('parameters',$this->data)?$this->data->parameters:array();
+		$data       = $this->data;
+		$config     = $this->config;
+        $errors     = $this->errors;
+		require_once(APP_FOLDER ."Controllers/{$controllerFileName}.php");
+		return $this;
+	}
+	/**
+	 *
+	 *	@param $url URL of the request
+	 * 	@param $requestmethods The request type, GET or POST
+	 */
 	public function Run($url,$requestmethods)
 	{
+		ob_start();
 		foreach($this->routes as $route)
 		{
 			$route->Run($url,$requestmethods);
 		}
+		return ob_get_clean();
 	}
 	public function CreateView()
 	{
-		return new View($this->theme,$this->data,$this->config);
+		return new View($this->config->theme,$this->data,$this->config);
 	}
+	public function CreatePageView()
+	{
+		return new PageView($this->config->theme,$this->data,$this->config);
+	}
+	public function ShowView($template)
+	{
+		$view = $this->CreateView();
+		$view->ShowView($template);
+	}
+	public function ShowPageView($template)
+	{		
+		$view = $this->CreatePageView();
+		echo $view->Show($template);
+	}	
 	public function GetData()
 	{
 		return $this->data;
@@ -160,6 +190,7 @@ class Controller
 		$this->data->Add($key,$value);
 	}
 }
+
 $controllerMap = array
 (
 	new ControllerMap('/characters',"characters",array()),
@@ -182,11 +213,16 @@ function SearchControllerMaps(array $list, $url,ControllerMap $default)
 	}
 	return $found;
 }
+
 require_once(APP_FOLDER."Model.php");
-function Debug($data) {	
+
+function Debug($data)
+{	
 	echo "<pre>".print_r($data,true),"</pre>";
 }
-function LoadModel($db,$category,$name) {
+
+function LoadModel($db,$category,$name)
+{
 	//Debug(func_get_args());
 	$name= "models\\$name";
 	if (!class_exists($name)) {
@@ -205,23 +241,18 @@ class Common
 			Common::$db = new PDO(LOCAL_DB_DSN,LOCAL_DB_USERNAME,LOCAL_DB_PASSWORD);
 		return Common::$db;
 	}
+}
+
+class Users
+{
 	
-	public static function SetUserData($data)
+	public static function GetGroups()
 	{
-
+		$groups = (isset($_SESSION['user']->groups)?$_SESSION['user']->groups:array());
+		return $groups;
 	}	
-}
-
-function GetGroups()
-{
-	$groups = (isset($_SESSION['user']->groups)?$_SESSION['user']->groups:array());
-	return $groups;
-}
-
-class System
-{
 	public static function LoggedIn()
 	{
 		return isset($_SESSION) && isset($_SESSION['user']) && isset($_SESSION['user']->Id);
-	}
+	}	
 }

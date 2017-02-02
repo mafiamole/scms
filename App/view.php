@@ -54,6 +54,7 @@ class ViewData implements Iterator
 			return ( $this->showErrors? $exception->GetMessage():"" );
 		}         
     }
+
     public function Equals($key,$toMatch,$true=true,$false=false)
     {
         try
@@ -67,6 +68,7 @@ class ViewData implements Iterator
 			return ( $this->showErrors? $exception->GetMessage():"" );
 		}            
     }
+
 	public function GetAll($key)
 	{
         try{
@@ -200,7 +202,7 @@ class ViewData implements Iterator
     {	
         $args = $this->ProcessArguments(func_get_args());
         if (count($args) == 1) return array_key_exists($args[0],$arr);
-		return $this->fetchIterative($keys,$args) !== false;        
+		return $this->fetchIterative($keys,$args) !== false;
     }
 
     protected function fetch($keys,$arr)
@@ -269,24 +271,23 @@ class View {
 
 	public function Show($template) {
 		ob_start();
-		//$Call = function($controllerName) { $this->Call($controllerName);	};
-		//$Show = function($value) { echo (string)$value; };
 		$parameters = $this->data->Get('parameters');
 		$data       = $this->data;
 		$config     = $this->config;
         $errors     = $this->errors;
-		require(APP_FOLDER . "/Themes/{$this->theme}/". $template);
+		require(APP_FOLDER . "/Themes/{$this->theme}/". $template.'.tpl.php');
 		return ob_get_clean();
 	}
+	/**
+	 * Run a controller, aimed for smaller shared modules to be included on a template.  
+	 *
+	 *  @Param string $controllerName The name of the controller
+	 */
 	public function Call($controllerName)
 	{
-		//$Call = function($controllerName) { $this->Call($controllerName);	};
-		//$Show = function($value) { echo (string)$value; };
-		$parameters = $this->data->Get('parameters');
-		$data       = $this->data;
-		$config     = $this->config;
-        $errors     = $this->errors;
-		require_once(APP_FOLDER ."Controllers/{$controllerName}.php");
+		$controller = new Controller(URL::GetRoot(),$this->data,$this->config);		
+		$controller->Initiate($controllerName);
+		echo $controller->Run($_SERVER['REQUEST_URI'], CheckRequestMethod());		
 	}
 	public function AddData($key,$value)
 	{

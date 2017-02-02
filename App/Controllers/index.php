@@ -1,4 +1,14 @@
 <?php
 
-$view = new View($this->theme,$this->data,$this->config);
-echo $view->Show('index.tpl.php');
+$this->AddData('page_title','Home');
+$this->Add
+(
+	REQUEST_GET,
+	'',
+	function($controller,$route,$parameters,$models)
+	{
+		$view = $this->CreateView();
+		echo $view->Show('index');
+	}
+);
+

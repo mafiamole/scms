@@ -1,7 +1,7 @@
 <?php
 session_start();
-require_once("config.php");
 
+require_once("config.php");
 
 class AppError
 {
@@ -74,6 +74,7 @@ class AppError
     public function getFooter() { return $this->footer; }
     public function getDate() { return $this->date; }
 }
+
 function SendErrorEmail(AppError $err)
 {
 	
@@ -96,6 +97,7 @@ function SendErrorEmail(AppError $err)
     $message = sprintf($template,$err->getHeader(),$err->getBody(),$err->getFooter(),$err->getDate());
     mb_send_mail(ADMIN_EMAIL,"An error has occured",$message);
 }
+
 function ShowError(AppError $err)
 {
 	$stackTrace = debug_backtrace();
@@ -166,40 +168,41 @@ function ShowError(AppError $err)
         ';        
         printf($template,"Error","We are sorry, An unrecoverable error has occured. An administrator has been contacted regarding this error.","");
     }
-printf('
-    </main>
-		<footer class="container text-center">
-			<a href="">&copy; Starfleet Strategic Response Fleet 2016. All rights reserved.</a><br />
-			Version: 0.0.0.1 (Alpha)
-		</footer>
-        
-    <link href="/Resources/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
-		<script src="/Resources/js/jquery-3.1.1.min.js" type="text/javascript"></script>
-		<script src="/Resources/bootstrap-3.3.7-dist/js/bootstrap.min.js" type="text/javascript"></script>
-	</body>
-</html>
-');    
-
+	printf('
+		</main>
+			<footer class="container text-center">
+				<a href="">&copy; Starfleet Strategic Response Fleet 2016. All rights reserved.</a><br />
+				Version: 0.0.0.1 (Alpha)
+			</footer>
+			
+		<link href="/Resources/bootstrap-3.3.7-dist/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+			<script src="/Resources/js/jquery-3.1.1.min.js" type="text/javascript"></script>
+			<script src="/Resources/bootstrap-3.3.7-dist/js/bootstrap.min.js" type="text/javascript"></script>
+		</body>
+	</html>
+	');
 }
+
 function ExceptionHandeler($ex)
 {
     $err = new AppError($ex);
     ShowError($err);
-    return true;
+    return false;
 }
+
 function ErrorHandeler($errno, $errstr, $errfile, $errline)
 {
     $err = new AppError($errno, $errstr, $errfile, $errline);
 	ShowError($err);
     /* Don't execute PHP internal error handler */
-    return true;
-	
+    return false;	
 }
-$old_exception_handler = set_exception_handler("ExceptionHandeler");
-$old_error_handler = set_error_handler("ErrorHandeler");
 
-$data = array();
-$config = array();
+$old_exception_handler 	= set_exception_handler("ExceptionHandeler");
+$old_error_handler 		= set_error_handler("ErrorHandeler");
+
+$data 							= array();
+$config 						= array();
 
 
 $defaults 						= array();
@@ -211,78 +214,75 @@ $defaults['page_content'] 		= 'Page content not found';
 $defaults['theme']				= 'Default';
 
 require_once(APP_FOLDER . "app.config.php");
-
-$config = array_replace_recursive($defaults,$config);
-
 require_once(APP_FOLDER . "view.php");
 require_once(APP_FOLDER . "Controller.php");
 
+$config = array_replace_recursive($defaults,$config);
 
 function SetLoggedOutGroups()
 {
 	if ( !isset($_SESSION['user']) || !isset($_SESSION['user']->groups)) {
 		$userModel = LoadModel(Common::LocalDB(),"Users","UsersModel");
 		$groups = $userModel->GetLoggedOutGroups();
-        $_SESSION['user']= new stdClass();
-		$_SESSION['user']->groups = $groups;
+        $_SESSION['user'] 			= new stdClass();
+		$_SESSION['user']->groups 	= $groups;
 	}
 }
-function GetURIS($path)
+class URL
 {
-	$getParamsStart = strrpos($path,"?");
-	if ($getParamsStart > 0 )
+	public static function GetURIs($path)
 	{
-		$pathWOGet = substr($_SERVER['REQUEST_URI'],0,$getParamsStart);
-	}
-	else
-	{
-		$pathWOGet = $path;
-	}
-	$output = array();
-	foreach (explode("/", $pathWOGet) as $uri)
-	{
-		if ( $uri && strlen($uri) > 0 )
+		$getParamsStart = strrpos($path,"?");
+		if ($getParamsStart > 0 )
 		{
-			$output[] = $uri;
+			$pathWOGet = substr($path,0,$getParamsStart);
 		}
+		else
+		{
+			$pathWOGet = $path;
+		}
+		$output = array();
+		foreach (explode("/", $pathWOGet) as $uri)
+		{
+			if ( $uri && strlen($uri) > 0 )
+			{
+				$output[] = $uri;
+			}
+		}
+		return $output;		
 	}
-	return $output;
+	/***
+	 * Gets the controller 'root'
+	 * @Param int $offset The number of uri's in it should consider as the controller root. Good for when we want an invoker outside the applications root.
+	 */
+	public static function GetRoot($offset = 0)
+	{
+		$parameters = URL::GetURIs($_SERVER['REQUEST_URI']);
+		return'/' + isset($parameters[$offset])?$parameters[$offset]:'';
+	}
 }
-
-
 
 SetLoggedOutGroups();
-$parameters = GetURIS($_SERVER['REQUEST_URI']);
+
+$parameters = URL::GetURIs($_SERVER['REQUEST_URI']);
+$root		= URL::GetRoot();
+
 $data['parameters'] = $parameters;
 if (isset($parameters[0]) && strtolower($parameters[0]) == "admin")
 {
 	require_once("admin.php");
 	exit;
 }
-$data['pageController'] = SearchControllerMaps(
-							$controllerMap,
-							$_SERVER['REQUEST_URI'],
-							new ControllerMap('/',"content",array())
-						);
 
-$data['TopNavigation'] = array
-(
-    array('ContentTitle'=>'Home','URL'=>'/','UserGroups'=>array('Id'=>1,2,3)),
-    array('ContentTitle'=>'Simm','URL'=>'/simm','UserGroups'=>array('Id'=>1,2,3)),
-    array('ContentTitle'=>'Stories','URL'=>'/stories','UserGroups'=>array('Id'=>1,2,3)),
-    array('ContentTitle'=>'Login','URL'=>'/users/login','UserGroups'=>array('Id'=>1)),
-    array('ContentTitle'=>'Register','URL'=>'/users/register','UserGroups'=>array('Id'=>1)),
-    array('ContentTitle'=>'Logout','URL'=>'/users/logout','UserGroups'=>array('Id'=>2,3))
+$foundCtlr = SearchControllerMaps(
+	$controllerMap,
+	$_SERVER['REQUEST_URI'],
+	new ControllerMap('/',"content",array())
 );
-foreach ($data['TopNavigation'] as $key => $tn)
-{
-	
-    $regex = "#^".preg_quote($tn['URL'])."#";
-    if (preg_match($regex,$_SERVER['REQUEST_URI']) !== false )
-    {
-        $data['TopNavigation'][$key]['Active'] = true;
-    }
-}
-$page = new PageView($config['theme'],$data,$config);
+$viewData 	= new ViewData($data);
+$viewConfig = new ViewData($config);
 
-echo $page->show('page.tpl.php');
+$controller = new Controller($root, $viewData,$viewConfig);
+$controller->Initiate($foundCtlr->Controller);
+$viewData->Add('mainContent', $controller->Run($_SERVER['REQUEST_URI'], CheckRequestMethod()));
+$controller->ShowPageView('page');

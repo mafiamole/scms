@@ -3,7 +3,7 @@
 				<h1><?php $config('site_title');?></h1>
 				<p><?php $config('site_slogan');?></p>
 			</header>
-			<?php if (!System::LoggedIn()) {?>
+			<?php if (!Users::LoggedIn()) {?>
 			<section class="row">
 				<div class="col-sm-1"></div>
 				<form id="loginForm" class="login-form col-sm-4" action="/users/login" method="post">
@@ -34,8 +34,7 @@
 							<input class="form-control" type="password" name="Password" />
 							<label for="ConfirmPassword">Confirm Password</label>
 							<input class="form-control" type="password" name="ConfirmPassword" />			
-							<br /><
-							button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
+							<br /><button class="btn btn-lg btn-primary btn-block" type="submit">Register</button>
 						</article>
 					</div>
 				</form>
