@@ -7,8 +7,6 @@ $this->Add
 	'',
 	function($controller,$route,$parameters,$models)
 	{
-		$view = $this->CreateView();
-		echo $view->Show('index');
+		echo $this->ShowView('index');
 	}
 );
-

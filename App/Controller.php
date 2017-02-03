@@ -1,5 +1,4 @@
 <?php
-
 class ControllerMap
 {
 	public $URL;
@@ -80,7 +79,7 @@ class Route
 	}
 	
 	public function Run($url,$requestMethods)
-	{	
+	{
 		$expr			= '@'.$this->url.'@';
 		$matches 		= array();
 		$urlMatch 		= preg_match('#'.$this->url.'#',$url,$matches);
@@ -185,8 +184,7 @@ class Controller
 		return $this->defaults;
 	}
 	public function AddData($key,$value)
-	{
-		
+	{		
 		$this->data->Add($key,$value);
 	}
 }

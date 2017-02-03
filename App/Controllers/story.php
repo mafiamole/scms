@@ -1,140 +1,24 @@
 <?php
+$this->AddModel("SimmsModels","Characters");
+$this->AddModel("SimmsModels","Stories");
+$this->AddModel("SimmsModels","Ranks");
 
-$parameter1 = $parameters(1);
-$parameter2 = $parameters(2);
-function AddQuest()
-{
-	
-}
-$stories    = LoadModel(Common::LocalDB(),"SimmsModels","Stories");
-$ranks      = LoadModel(Common::LocalDB(),"SimmsModels","Ranks");
-$characters = LoadModel(Common::LocalDB(),"SimmsModels","Characters");
-function GetQuests()
-{
-	$groups = GetGroups();
-	$contentModel		= LoadModel(Common::LocalDB(),"Content","ContentModel");
-	$questCats 			= $contentModel->GetContentByType("QuestCategory",$groups);
-	foreach ($questCats as $key => $questCat)
+$this->Add
+(
+    REQUEST_POST,
+    '/create',
+	function($controller,$route,$parameters,$models)
 	{
-		$questCats[$key]->Quests = $contentModel->GetChildItems($questCat->ContentId,$groups);
-		foreach ($questCats[$key]->Quests as $QKey => $quest)
-		{
-			$questCats[$key]->Quests[$QKey]->Posts = $contentModel->GetChildItems($quest->ContentId,$groups); // Change to a count!
-		}
-	}
-	return $questCats;
-}
-
-function GetRanks()
-{
-	$groups 		= GetGroups();
-	$contentModel	= LoadModel(Common::LocalDB(),"Content","ContentModel");
-	$contents 		= $contentModel->GetContentByType("Rank",$groups);
-	return $contents;
-}
-
-function GetQuest($id)
-{
-	$groups            = GetGroups();
-	$contentModel		= LoadModel(Common::LocalDB(),"Content","ContentModel");
-	$content = $contentModel->Get($id);
-	$content->Posts =  $contentModel->GetChildItems($content->ContentId,$groups);
-	$ranks = GetRanks();
-	$characters = GetCharacters(true);
-	foreach ($content->Posts as $key => $post)
+        $this->ShowView('createStory.tpl.php');
+    }
+);
+$this->Add
+(
+    REQUEST_POST,
+    '/post/([0-9]*)',
+	function($controller,$route,$parameters,$models)
 	{
-		
-		if (isset($post->Characters))
-        {
-			$characterIds = explode(",",$post->Characters);
-			$content->Posts[$key]->Characters = array();
-			foreach($characterIds as $char)
-			{
-				$foundChar = FindContent($char,$characters);
-				if ( $foundChar )
-				{
-					//$foundChar->Rank = FindContent($foundChar->Rank,$ranks);
-					$content->Posts[$key]->Characters[] = $foundChar;
-					
-				}
-			}
-		}
-		else
-		{
-			$post->Characters = array();
-		}
-				
-	}
-	return $content;
-}
-
-function GetCharacters($getRanks = false)
-{
-	$groups = GetGroups();
-	$contentModel		= LoadModel(Common::LocalDB(),"Content","ContentModel");
-	$contents = $contentModel->GetContentByType("Character",$groups);
-	$ranks = GetRanks();
-	if ( $getRanks ) {
-		foreach ($contents as $key => $c)
-		{
-			$c->Rank = new stdclass();
-			$c->Rank = FindContent($c->Rank,$ranks);
-			$contents[$key] = $c;
-		}
-	}
-	return $contents;
-}
-
-function AddPost($post,$questId)
-{
-	$contentModel		= LoadModel(Common::LocalDB(),"Content","ContentModel");
-	$contentLangModel	= LoadModel(Common::LocalDB(),"Content","ContentLangModel");
-	$ctm 				= LoadModel(Common::LocalDB(),"Content","ContentTypesModel");
-	$contentDataModel 	= LoadModel(Common::LocalDB(),"Content","ContentDataModel");
-	
-	$quest 			= $contentModel->Get($questId);
-	$contentType	= $ctm->Get("QuestPost");
-	if ($quest) {
-		$post['Parent_id'] 			= $questId * 1;
-		$post['URL']				= "/quests/view/";
-		
-		$post['Users_id'] 			= $_SESSION['user']->Id;
-		$post['ContentTypes_id'] 	= $contentType->Id;
-		$post['Applications_AppId'] = 1;
-		$post['Languages_id']		= $_SESSION['user']->Languages_id;
-		$post['Keywords'] 			= "";
-		
-		$characters 				= array();
-		foreach($post['UsersCharacters'] as $char)
-		{
-			$characters[] = $char * 1;
-		}
-		/*
-		foreach($post['OthersCharacters'] as $char)
-		{
-			$characters[] = $char * 1;
-		}*/		
-		$post['Characters']			= implode(",",$characters);
-		$contentId = $contentModel->Add($post);
-		$post['Content_id'] = $contentId;
-		$contentLangId = $contentLangModel->Add($post);
-		header("location:/stories/view/".$questId);
-	}
-}
-
-$view = null;
-switch ( $parameter1 ) {
-	case "create":		
-		$this->config['page_title'] = "Create a new Quest";
-		$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);		
-		echo $contentView->show('createStory.tpl.php');
-	break;
-	case "post":		
-		$this->config['page_title'] = "Create a new Quest Post";
-		$qID = isset($parameters[2])?(int)$parameters[2]:0;
-		$characters = GetCharacters();
-		$this->data->Add('UsersCharacters',$characters);
-		$this->data->Add('OthersCharacters',$characters);
+        $id = $parameters[1] * 1;
 		$this->data->Add('PostData', array(
 			'Title' => "",
 			'Description' => "",
@@ -177,32 +61,63 @@ switch ( $parameter1 ) {
 					$this->data['PostData']['OthersCharacters'][] = $character * 1;
 				}				
             }
-            $success = $stories->Add($this->Data['PostData'],$qID);
-			if ( $success ) {
-				header("locations:/stories/view/".$qID);
-			}			
+            $success = $stories->Add($this->Data['PostData'],$id);
+			if ( $success )
+            {
+				header("locations:/stories/view/".$id);
+			}
 		}
-		$this->errors->Add('Post',$postErr);
-		$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);		
-		echo $contentView->show('createStoryPost.tpl.php');
-	break;	
-	case "view":		
-		$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);
-		$qID = $parameter2;
-		$quest = $stories->GetCategories($qID);
-		$this->data->Add('Quest',$quest);
+		$this->errors->Add('Post',$postErr);        
+    }
+);
+$this->Add
+(
+    REQUEST_POST | REQUEST_GET,
+    '/post',
+	function($controller,$route,$parameters,$models)
+	{
+        $this->data('page_title',"Create a new Quest Post");
+		$characters = $this->models->Characters->GetAll();
+		$this->data->Add('UsersCharacters',$characters);
+		$this->data->Add('OthersCharacters',$characters);
+        $this->ShowView('createStoryPost.tpl.php');
+    }
+);
+$this->Add
+(
+    REQUEST_POST | REQUEST_GET,
+    '/create',
+	function($controller,$route,$parameters,$models)
+	{
+        $this->data('page_title',"Create a new Quest");	
+        $this->ShowView('createStory.tpl.php');
+    }
+);
+$this->Add
+(
+    REQUEST_GET,
+    '/view/([0-9]*)',
+	function($controller,$route,$parameters,$models)
+	{
+        $id = $parameters[1] * 1;
+		$story = $this->models->Stories->GetCategories($id);
+		$this->data->Add('Story',$story);
 		if ($quest != null)
         {		
 			$this->config->Add('page_title', "Viewing ".$quest->ContentTitle);
 		}
-		$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);
-		echo $contentView->show('story.tpl.php');		
-	break;
-	default:
-		$stories = $stories->GetAll();
+        $this->ShowView('story.tpl.php');	        
+    }
+);
+$this->Add
+(
+    REQUEST_POST,
+    '/?$',
+	function($controller,$route,$parameters,$models)
+	{
+		$stories = $this->models->Stories->GetAll();
 		$this->config->Add('page_title', "Stories");
 		$this->data->Add('StoryCategories',$stories);
-		$contentView = new View($this->theme,$this->defaults,$this->data,$this->config);
-		echo $contentView->show('stories.tpl.php');
-	break;	
-}
+        $this->ShowView('stories.tpl.php');
+    }
+);

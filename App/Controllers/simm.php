@@ -1,10 +1,9 @@
 <?php
 
-$controller = new Controller('/simm',$this->data,$this->config,$this->theme);
-$controller->AddModel("SimmsModels","Characters");
-$controller->AddModel("SimmsModels","Simm");
+$this->AddModel("SimmsModels","Characters");
+$this->AddModel("SimmsModels","Simm");
 
-$controller->Add
+$this->Add
 (
 	REQUEST_POST,
 	'/create',
@@ -26,7 +25,7 @@ $controller->Add
 	}
 );
 
-$controller->Add
+$this->Add
 (
 	REQUEST_POST,
 	'/edit/([0-9]*)',
@@ -48,7 +47,7 @@ $controller->Add
 	}
 );
 
-$controller->Add
+$this->Add
 (
 	REQUEST_GET | REQUEST_POST,
 	'/create',
@@ -78,12 +77,11 @@ $controller->Add
         $this->AddData('additionalData',$additionalContent);
         $this->AddData('SelectedPosition',$_GET['position'] * 1);
         
-        $contentView = $controller->CreateView();
-        echo $contentView->show('createCharacter.tpl.php');
+        $this->ShowView('createCharacter.tpl.php');
 	}
 );
 
-$controller->Add
+$this->Add
 (
 	REQUEST_GET | REQUEST_POST,
 	'/edit/([0-9]*)',
@@ -102,13 +100,12 @@ $controller->Add
             $this->AddData('Character',$character);
             $this->AddData('AdditionalData',$additionalContent);
 
-            $contentView = $controller->CreateView();
-            echo $contentView->show('editCharacter.tpl.php');
+            $this->ShowView('editCharacter.tpl.php');
         }
 	}
 );
 
-$controller->Add
+$this->Add
 (
 	REQUEST_GET,
 	'/view/([0-9]+)',
@@ -123,16 +120,14 @@ $controller->Add
             $fields         = $models['Characters']->GetFields();
             $this->AddData('Character',$character);
             $this->AddData('Fields',$fields);
-            $this->AddConfig('page_title',"Viewing ".($character->ContentTitle?"{$character->ContentTitle}'s":"")." Profile");
-            $contentView = $controller->CreateView();
-			$contentView->AddConfig('page_title',"Viewing ".($character->ContentTitle?"{$character->ContentTitle}'s":"")." Profile");
-            echo $contentView->show('character.tpl.php');
+            $this->AddData('page_title',"Viewing ".($character->ContentTitle?"{$character->ContentTitle}'s":"")." Profile");
+            $this->ShowView('character.tpl.php');
         }
 	}
 );
 
 /** Default Route **/
-$controller->Add
+$this->Add
 (
 	REQUEST_GET,
 	'/?$',
@@ -140,11 +135,8 @@ $controller->Add
 	{
 		$manifest 		= $models['Simm']->Manifest();
 		$description 	= $models['Simm']->Description();
-        $controller->AddData('Manifest',$manifest);
-        $controller->AddData('Description',$description);
-		
-        $contentView = $controller->CreateView();
-        echo $contentView->show('simm.tpl.php');
+        $this->AddData('Manifest',$manifest);
+        $this->AddData('Description',$description);
+        $this->ShowView('simm.tpl.php');
 	}
 );
-$controller->Run($_SERVER['REQUEST_URI'],CheckRequestMethod());

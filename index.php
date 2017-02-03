@@ -204,7 +204,6 @@ $old_error_handler 		= set_error_handler("ErrorHandeler");
 $data 							= array();
 $config 						= array();
 
-
 $defaults 						= array();
 $defaults['site_title'] 		= 'Site Title';
 $defaults['page_title'] 		= 'Page Title';
@@ -274,7 +273,8 @@ if (isset($parameters[0]) && strtolower($parameters[0]) == "admin")
 	exit;
 }
 
-$foundCtlr = SearchControllerMaps(
+$foundCtlr = SearchControllerMaps
+(
 	$controllerMap,
 	$_SERVER['REQUEST_URI'],
 	new ControllerMap('/',"content",array())
@@ -284,5 +284,5 @@ $viewConfig = new ViewData($config);
 
 $controller = new Controller($root, $viewData,$viewConfig);
 $controller->Initiate($foundCtlr->Controller);
-$viewData->Add('mainContent', $controller->Run($_SERVER['REQUEST_URI'], CheckRequestMethod()));
+$controller->AddData('mainContent',$controller->Run($_SERVER['REQUEST_URI'], CheckRequestMethod()));
 $controller->ShowPageView('page');

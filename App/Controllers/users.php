@@ -1,18 +1,34 @@
 <?php
 require(APP_FOLDER . "/ThirdParty/password.php");
 require(APP_FOLDER . "/Helpers/Validator.php");
+$pageTitle = 'Users'
+$titles = array(
+    'register'              => 'Register',
+    'login'                 => 'Login',
+    'registrationcomplete'  => 'Registration Complete',
+    'view'                  => 'Viewing Profile',
+    'loggedin'              => 'Logged In'
+)
+$pageMachineName = $this->Data->Get('parameters',1);
+if ($pageMachineName != null && array_key_exists($pageMachineName,$titles))
+{
+    $pageTitle = $titles[$pageMachineName];
+}
+$this->AddData('page_title',$pageTitle);
 
-function Login() {
+function Login()
+{
 	$sanitizer = new Sanitize($_POST);
 	$email = $sanitizer->CheckEmail('Email');
 	$db = Common::LocalDB();
 	$model = LoadModel($db,'Users','UsersModel');
 	$user = $model->FindExistingByEmail($email);
-    if (!$user) {
+    if (!$user)
+    {
         return array('Email'=>"User not found");
     }
 	$validPassword =  password_verify($_POST['Password'],$user->Password);
-	if ( $validPassword ) 
+	if ( $validPassword )
 	{
 		// Set up session
 		$_SESSION['user'] = array();
@@ -35,9 +51,8 @@ function Login() {
 	}
 }
 
-$controller = new Controller('/users',$this->data,$this->config,$this->theme);
 
-$controller->Add
+$this->Add
 (
 	REQUEST_POST,
 	'/register',
@@ -84,7 +99,8 @@ $controller->Add
         }		
 	}
 );
-$controller->Add
+
+$this->Add
 (
 	REQUEST_POST,
 	'/login',
@@ -95,58 +111,63 @@ $controller->Add
 	}
 );
 
-$controller->Add
+$this->Add
 (
 	REQUEST_GET | REQUEST_POST,
 	'/register',
 	function($controller,$route,$parameters,$models)
 	{
-		$this->config['page_title'] 				= "Register";
-		$this->data['PostData']['Email'] 			= "";
-		$this->data['PostData']['Password'] 		= "";
-		$this->data['PostData']['ConfirmPassword'] 	= "";
+        $this->data->Add('page_title', "Register today");
+        
+        $postData = array();
+        $postData['Email']              ="";
+        $postData['Password']           ="";
+        $postData['ConfirmPassword']    ="";
+        
+        $this->errors->Add('PostData',$postData);
         $postErrors = array();
 
         $this->errors->Add('Post',$postErrors);
-		$contentView = $controller->CreateView();
-		echo $contentView->show('register.tpl.php');
+        
+		$this->ShowView('register.tpl.php');
 	}
 );
-$controller->Add
+
+$this->Add
 (
 	REQUEST_GET,
 	'/registrationcomplete',
 	function($controller,$route,$parameters,$models)
 	{
-		$config['page_title'] = "Register";
-		$contentView = $controller->CreateView();
-		echo $contentView->show('registrationComplete.tpl.php');		
+        $this->data->Add('page_title', "Registration complete");
+		$this->ShowView('registrationComplete.tpl.php');		
 	}
 );
-$controller->Add
+
+$this->Add
 (
 	REQUEST_GET,
 	'/view',
 	function($controller,$route,$parameters,$models)
 	{
-		$this->config['page_title'] = "Users";
-		$contentView = $controller->CreateView();
-		echo $contentView->show('user.tpl.php');		
+        
+		$this->data->Add('page_title', "Users");
+		$this->ShowView('user.tpl.php');		
 	}
 );
+
 $controller->Add
 (
 	REQUEST_GET | REQUEST_POST,
 	'/login',
 	function($controller,$route,$parameters,$models)
-	{
-		
-		$this->config->Add('page_title',"Login");
-		$contentView = $controller->CreateView();
-		echo $contentView->show('login.tpl.php');		
+	{		
+		$this->data->Add('page_title',"Login");
+		$this->ShowView('login.tpl.php');		
 	}
 );
-$controller->Add
+
+$this->Add
 (
 	REQUEST_GET | REQUEST_POST,
 	'/logout',
@@ -157,26 +178,25 @@ $controller->Add
 		header("location:/users/login");
 	}
 );
-$controller->Add
+
+$this->Add
 (
 	REQUEST_GET | REQUEST_POST,
 	'/loggedin',
 	function($controller,$route,$parameters,$models)
 	{
-		$this->config->Add('page_title',"Login");
-		$contentView = $controller->CreateView();
-		echo $contentView->show('loginComplete.tpl.php');
+		$this->data->Add('page_title',"Login");
+		$this->ShowView('loginComplete.tpl.php');
 	}
 );
-$controller->Add
+
+$this->Add
 (
 	REQUEST_GET | REQUEST_POST,
 	'/$',
 	function($controller,$route,$parameters,$models)
 	{
-		$this->config->Add('page_title',"Users");
-		$contentView = new View($this->theme,$this->data,$this->config);
-		echo $contentView->show('users.tpl.php');
+		$this->data->Add('page_title',"Users");
+		$this->ShowView('users.tpl.php');
 	}
 );
-$controller->Run($_SERVER['REQUEST_URI'],CheckRequestMethod());
