@@ -2,431 +2,527 @@ SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='TRADITIONAL,ALLOW_INVALID_DATES';
 
+CREATE SCHEMA IF NOT EXISTS `SCMS` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci ;
+USE `SCMS` ;
 
 -- -----------------------------------------------------
--- Table `applications`
+-- Table `SCMS`.`Languages`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `applications` (
-  `AppId` INT(11) NOT NULL AUTO_INCREMENT ,
-  `Name` VARCHAR(80) NULL DEFAULT NULL ,
-  `Key` VARCHAR(80) NULL DEFAULT NULL ,
-  PRIMARY KEY (`AppId`) )
-ENGINE = InnoDB
-AUTO_INCREMENT = 2
-DEFAULT CHARACTER SET = utf8;
+DROP TABLE IF EXISTS `SCMS`.`Languages` ;
 
-
--- -----------------------------------------------------
--- Table `languages`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `languages` (
-  `Id` INT(11) NOT NULL AUTO_INCREMENT ,
-  `Name` VARCHAR(45) NULL DEFAULT NULL ,
-  `Direction` VARCHAR(3) NULL DEFAULT NULL ,
+CREATE  TABLE IF NOT EXISTS `SCMS`.`Languages` (
+  `Id` INT NOT NULL AUTO_INCREMENT ,
+  `Name` VARCHAR(45) NULL ,
+  `Direction` VARCHAR(3) NULL ,
   PRIMARY KEY (`Id`) )
-ENGINE = InnoDB
-AUTO_INCREMENT = 2
-DEFAULT CHARACTER SET = utf8;
+ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `users`
+-- Table `SCMS`.`Users`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `users` (
-  `Id` INT(11) NOT NULL AUTO_INCREMENT ,
-  `Email` VARCHAR(60) NULL DEFAULT NULL ,
-  `Password` VARCHAR(100) NULL DEFAULT NULL ,
-  `Registration` DATETIME NULL DEFAULT NULL ,
-  `LastLogin` DATETIME NULL DEFAULT NULL ,
-  `SSRFEmail` VARCHAR(60) NULL DEFAULT NULL ,
-  `Languages_id` INT(11) NOT NULL ,
-  `AuthenticationToken` VARCHAR(100) NULL DEFAULT NULL ,
-  `Admin` VARCHAR(45) NULL DEFAULT NULL ,
+DROP TABLE IF EXISTS `SCMS`.`Users` ;
+
+CREATE  TABLE IF NOT EXISTS `SCMS`.`Users` (
+  `Id` INT NOT NULL AUTO_INCREMENT ,
+  `Email` VARCHAR(60) NULL ,
+  `Password` VARCHAR(100) NULL ,
+  `Registration` DATETIME NULL ,
+  `LastLogin` DATETIME NULL ,
+  `SSRFEmail` VARCHAR(60) NULL ,
+  `Languages_id` INT NOT NULL ,
+  `AuthenticationToken` VARCHAR(100) NULL ,
+  `Admin` VARCHAR(45) NULL ,
   PRIMARY KEY (`Id`) ,
   INDEX `fk_Users_Languages1_idx` (`Languages_id` ASC) ,
   CONSTRAINT `fk_Users_Languages1`
     FOREIGN KEY (`Languages_id` )
-    REFERENCES `languages` (`Id` )
+    REFERENCES `SCMS`.`Languages` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB
-AUTO_INCREMENT = 2
-DEFAULT CHARACTER SET = utf8;
+ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `authkeys`
+-- Table `SCMS`.`UserGroups`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `authkeys` (
-  `Users_Id` INT(11) NOT NULL ,
-  `Applications_AppId` INT(11) NOT NULL ,
-  `Key` VARCHAR(80) NULL DEFAULT NULL ,
-  `Expire Date` BIGINT(20) NULL DEFAULT NULL ,
-  PRIMARY KEY (`Users_Id`, `Applications_AppId`) ,
-  INDEX `fk_AuthKeys_Users1_idx` (`Users_Id` ASC) ,
-  INDEX `fk_AuthKeys_Applications1_idx` (`Applications_AppId` ASC) ,
-  CONSTRAINT `fk_AuthKeys_Applications1`
-    FOREIGN KEY (`Applications_AppId` )
-    REFERENCES `applications` (`AppId` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_AuthKeys_Users1`
-    FOREIGN KEY (`Users_Id` )
-    REFERENCES `users` (`Id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
+DROP TABLE IF EXISTS `SCMS`.`UserGroups` ;
 
-
--- -----------------------------------------------------
--- Table `contenttypes`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `contenttypes` (
-  `Id` INT(11) NOT NULL AUTO_INCREMENT ,
-  `Name` VARCHAR(45) NULL DEFAULT NULL ,
+CREATE  TABLE IF NOT EXISTS `SCMS`.`UserGroups` (
+  `Id` INT NOT NULL AUTO_INCREMENT ,
+  `Name` VARCHAR(45) NOT NULL ,
+  `Created` DATETIME NOT NULL ,
+  `AssignLoggedOutUsers` BIT NOT NULL ,
   PRIMARY KEY (`Id`) )
-ENGINE = InnoDB
-AUTO_INCREMENT = 8
-DEFAULT CHARACTER SET = utf8;
+ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `content`
+-- Table `SCMS`.`UsersInGroups`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `content` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT ,
-  `Parent_id` INT(11) NULL DEFAULT NULL ,
-  `URL` VARCHAR(100) NULL DEFAULT NULL ,
-  `ContentTypes_id` INT(11) NOT NULL ,
-  `Users_id` INT(11) NOT NULL ,
-  `Applications_AppId` INT(11) NOT NULL ,
-  PRIMARY KEY (`id`) ,
-  INDEX `fk_Content_ContentTypes1_idx` (`ContentTypes_id` ASC) ,
-  INDEX `fk_Content_Users1_idx` (`Users_id` ASC) ,
-  INDEX `fk_Content_Applications1_idx` (`Applications_AppId` ASC) ,
-  CONSTRAINT `fk_Content_Applications1`
-    FOREIGN KEY (`Applications_AppId` )
-    REFERENCES `applications` (`AppId` )
+DROP TABLE IF EXISTS `SCMS`.`UsersInGroups` ;
+
+CREATE  TABLE IF NOT EXISTS `SCMS`.`UsersInGroups` (
+  `Users_Id` INT NOT NULL AUTO_INCREMENT ,
+  `UserGroups_Id` INT NOT NULL ,
+  INDEX `fk_UsersInGroups_Users_idx` (`Users_Id` ASC) ,
+  INDEX `fk_UsersInGroups_usergroups1_idx` (`UserGroups_Id` ASC) ,
+  CONSTRAINT `fk_UsersInGroups_Users`
+    FOREIGN KEY (`Users_Id` )
+    REFERENCES `SCMS`.`Users` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
+  CONSTRAINT `fk_UsersInGroups_usergroups1`
+    FOREIGN KEY (`UserGroups_Id` )
+    REFERENCES `SCMS`.`UserGroups` (`Id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `SCMS`.`ContentTypes`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `SCMS`.`ContentTypes` ;
+
+CREATE  TABLE IF NOT EXISTS `SCMS`.`ContentTypes` (
+  `Id` INT NOT NULL AUTO_INCREMENT ,
+  `Name` VARCHAR(45) NULL ,
+  PRIMARY KEY (`Id`) )
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `SCMS`.`Applications`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `SCMS`.`Applications` ;
+
+CREATE  TABLE IF NOT EXISTS `SCMS`.`Applications` (
+  `AppId` INT NOT NULL AUTO_INCREMENT ,
+  `Name` VARCHAR(80) NULL ,
+  `Key` VARCHAR(80) NULL ,
+  PRIMARY KEY (`AppId`) )
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `SCMS`.`Content`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `SCMS`.`Content` ;
+
+CREATE  TABLE IF NOT EXISTS `SCMS`.`Content` (
+  `Id` INT NOT NULL AUTO_INCREMENT ,
+  `Parent_Id` INT NULL ,
+  `URL` VARCHAR(100) NULL ,
+  `ContentTypes_Id` INT NOT NULL ,
+  `Author_Id` INT NOT NULL ,
+  `Applications_AppId` INT NOT NULL ,
+  PRIMARY KEY (`Id`) ,
+  INDEX `fk_Content_ContentTypes1_idx` (`ContentTypes_Id` ASC) ,
+  INDEX `fk_Content_Users1_idx` (`Author_Id` ASC) ,
+  INDEX `fk_Content_Applications1_idx` (`Applications_AppId` ASC) ,
   CONSTRAINT `fk_Content_ContentTypes1`
-    FOREIGN KEY (`ContentTypes_id` )
-    REFERENCES `contenttypes` (`Id` )
+    FOREIGN KEY (`ContentTypes_Id` )
+    REFERENCES `SCMS`.`ContentTypes` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_Content_Users1`
-    FOREIGN KEY (`Users_id` )
-    REFERENCES `users` (`Id` )
+    FOREIGN KEY (`Author_Id` )
+    REFERENCES `SCMS`.`Users` (`Id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Content_Applications1`
+    FOREIGN KEY (`Applications_AppId` )
+    REFERENCES `SCMS`.`Applications` (`AppId` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB
-AUTO_INCREMENT = 47
-DEFAULT CHARACTER SET = utf8;
+ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `usergroups`
+-- Table `SCMS`.`ContentTypeFields`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `usergroups` (
-  `Id` INT(11) NOT NULL AUTO_INCREMENT ,
-  `Name` VARCHAR(45) NOT NULL ,
-  `Created` DATETIME NOT NULL ,
-  `AssignLoggedOutUsers` BIT(1) NOT NULL ,
-  PRIMARY KEY (`Id`) )
-ENGINE = InnoDB
-AUTO_INCREMENT = 4
-DEFAULT CHARACTER SET = utf8;
+DROP TABLE IF EXISTS `SCMS`.`ContentTypeFields` ;
+
+CREATE  TABLE IF NOT EXISTS `SCMS`.`ContentTypeFields` (
+  `Id` INT NOT NULL AUTO_INCREMENT ,
+  `ContentTypes_Id` INT NOT NULL ,
+  `Name` VARCHAR(45) NULL ,
+  `Type` VARCHAR(45) NULL ,
+  PRIMARY KEY (`Id`) ,
+  INDEX `fk_ContentTypeFields_ContentTypes1_idx` (`ContentTypes_Id` ASC) ,
+  CONSTRAINT `fk_ContentTypeFields_ContentTypes1`
+    FOREIGN KEY (`ContentTypes_Id` )
+    REFERENCES `SCMS`.`ContentTypes` (`Id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `contentaccessrights`
+-- Table `SCMS`.`ContentData`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `contentaccessrights` (
-  `Id` INT(11) NOT NULL AUTO_INCREMENT ,
-  `UserGroups_id` INT(11) NOT NULL ,
-  `Value` VARCHAR(4) NULL DEFAULT NULL ,
-  `ContentTypes_id` INT(11) NOT NULL ,
+DROP TABLE IF EXISTS `SCMS`.`ContentData` ;
+
+CREATE  TABLE IF NOT EXISTS `SCMS`.`ContentData` (
+  `Id` INT NOT NULL AUTO_INCREMENT ,
+  `Content_Id` INT NOT NULL ,
+  `ContentTypeFields_Id` INT NOT NULL ,
+  `Languages_Id` INT NOT NULL ,
+  `Value` LONGTEXT NULL ,
+  PRIMARY KEY (`Id`, `Languages_Id`, `Content_Id`, `ContentTypeFields_Id`) ,
+  INDEX `fk_ContentData_ContentTypeFields1_idx` (`ContentTypeFields_Id` ASC) ,
+  INDEX `fk_ContentData_Content1_idx` (`Content_Id` ASC) ,
+  INDEX `fk_ContentData_Languages1_idx` (`Languages_Id` ASC) ,
+  CONSTRAINT `fk_ContentData_ContentTypeFields1`
+    FOREIGN KEY (`ContentTypeFields_Id` )
+    REFERENCES `SCMS`.`ContentTypeFields` (`Id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_ContentData_Content1`
+    FOREIGN KEY (`Content_Id` )
+    REFERENCES `SCMS`.`Content` (`Id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_ContentData_Languages1`
+    FOREIGN KEY (`Languages_Id` )
+    REFERENCES `SCMS`.`Languages` (`Id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `SCMS`.`ContentAccessRights`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `SCMS`.`ContentAccessRights` ;
+
+CREATE  TABLE IF NOT EXISTS `SCMS`.`ContentAccessRights` (
+  `Id` INT NOT NULL AUTO_INCREMENT ,
+  `UserGroups_id` INT NOT NULL ,
+  `Value` VARCHAR(4) NULL ,
+  `ContentTypes_id` INT NOT NULL ,
   PRIMARY KEY (`Id`) ,
   INDEX `fk_ContentAccessRights_UserGroups1_idx` (`UserGroups_id` ASC) ,
   INDEX `fk_ContentAccessRights_ContentTypes1_idx` (`ContentTypes_id` ASC) ,
-  CONSTRAINT `fk_ContentAccessRights_ContentTypes1`
-    FOREIGN KEY (`ContentTypes_id` )
-    REFERENCES `contenttypes` (`Id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
   CONSTRAINT `fk_ContentAccessRights_UserGroups1`
     FOREIGN KEY (`UserGroups_id` )
-    REFERENCES `usergroups` (`Id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB
-AUTO_INCREMENT = 34
-DEFAULT CHARACTER SET = utf8;
-
-
--- -----------------------------------------------------
--- Table `contentlang`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `contentlang` (
-  `Id` INT(11) NOT NULL AUTO_INCREMENT ,
-  `Content_id` INT(11) NOT NULL ,
-  `Languages_id` INT(11) NOT NULL ,
-  `Title` VARCHAR(50) NULL DEFAULT NULL ,
-  `Keywords` TEXT NOT NULL ,
-  `Description` TEXT NULL DEFAULT NULL ,
-  `Created` DATETIME NULL DEFAULT NULL ,
-  `LastModified` DATETIME NULL DEFAULT NULL ,
-  PRIMARY KEY (`Id`) ,
-  INDEX `fk_ContentLang_Content1_idx` (`Content_id` ASC) ,
-  INDEX `fk_ContentLang_Languages1_idx` (`Languages_id` ASC) ,
-  CONSTRAINT `fk_ContentLang_Content1`
-    FOREIGN KEY (`Content_id` )
-    REFERENCES `content` (`id` )
+    REFERENCES `SCMS`.`UserGroups` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_ContentLang_Languages1`
-    FOREIGN KEY (`Languages_id` )
-    REFERENCES `languages` (`Id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB
-AUTO_INCREMENT = 33
-DEFAULT CHARACTER SET = utf8;
-
-
--- -----------------------------------------------------
--- Table `contenttypefields`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `contenttypefields` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT ,
-  `ContentTypes_id` INT(11) NOT NULL ,
-  `Name` VARCHAR(45) NULL DEFAULT NULL ,
-  `Type` VARCHAR(45) NULL DEFAULT NULL ,
-  `TypeData` VARCHAR(45) NULL DEFAULT NULL ,
-  PRIMARY KEY (`id`) ,
-  INDEX `fk_ContentTypeFields_ContentTypes1_idx` (`ContentTypes_id` ASC) ,
-  CONSTRAINT `fk_ContentTypeFields_ContentTypes1`
+  CONSTRAINT `fk_ContentAccessRights_ContentTypes1`
     FOREIGN KEY (`ContentTypes_id` )
-    REFERENCES `contenttypes` (`Id` )
+    REFERENCES `SCMS`.`ContentTypes` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB
-AUTO_INCREMENT = 16
-DEFAULT CHARACTER SET = utf8;
+ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `contentdata`
+-- Table `SCMS`.`UserDataTypes`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `contentdata` (
-  `Id` INT(11) NOT NULL AUTO_INCREMENT ,
-  `ContentLang_id` INT(11) NOT NULL ,
-  `ContentTypeFields_id` INT(11) NOT NULL ,
-  `Value` LONGTEXT NULL DEFAULT NULL ,
-  PRIMARY KEY (`Id`) ,
-  INDEX `fk_ContentData_ContentTypeFields1_idx` (`ContentTypeFields_id` ASC) ,
-  INDEX `fk_ContentData_ContentLang1_idx` (`ContentLang_id` ASC) ,
-  CONSTRAINT `fk_ContentData_ContentLang1`
-    FOREIGN KEY (`ContentLang_id` )
-    REFERENCES `contentlang` (`Id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_ContentData_ContentTypeFields1`
-    FOREIGN KEY (`ContentTypeFields_id` )
-    REFERENCES `contenttypefields` (`id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB
-AUTO_INCREMENT = 48
-DEFAULT CHARACTER SET = utf8;
+DROP TABLE IF EXISTS `SCMS`.`UserDataTypes` ;
 
-
--- -----------------------------------------------------
--- Table `contentdataaccessrights`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `contentdataaccessrights` (
-  `Id` INT(11) NOT NULL AUTO_INCREMENT ,
-  `ContentTypeFields_id` INT(11) NOT NULL ,
-  `UserGroups_id` INT(11) NOT NULL ,
-  `Value` VARCHAR(4) NULL DEFAULT NULL ,
-  PRIMARY KEY (`Id`, `UserGroups_id`, `ContentTypeFields_id`) ,
-  INDEX `fk_ContentDataAccessRights_UserGroups1_idx` (`UserGroups_id` ASC) ,
-  INDEX `fk_ContentDataAccessRights_ContentTypeFields1_idx` (`ContentTypeFields_id` ASC) ,
-  CONSTRAINT `fk_ContentDataAccessRights_ContentTypeFields1`
-    FOREIGN KEY (`ContentTypeFields_id` )
-    REFERENCES `contenttypefields` (`id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
-  CONSTRAINT `fk_ContentDataAccessRights_UserGroups1`
-    FOREIGN KEY (`UserGroups_id` )
-    REFERENCES `usergroups` (`Id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB
-AUTO_INCREMENT = 46
-DEFAULT CHARACTER SET = utf8;
-
-
--- -----------------------------------------------------
--- Table `userdatatypes`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `userdatatypes` (
-  `Id` INT(11) NOT NULL AUTO_INCREMENT ,
-  `Name` VARCHAR(45) NULL DEFAULT NULL ,
-  `Type` VARCHAR(45) NULL DEFAULT NULL ,
+CREATE  TABLE IF NOT EXISTS `SCMS`.`UserDataTypes` (
+  `Id` INT NOT NULL AUTO_INCREMENT ,
+  `Name` VARCHAR(45) NULL ,
+  `Type` VARCHAR(45) NULL ,
   PRIMARY KEY (`Id`) )
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
+ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `userdata`
+-- Table `SCMS`.`UserData`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `userdata` (
-  `Id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT ,
-  `UserDataTypes_id` INT(11) NOT NULL ,
-  `Users_id` INT(11) NOT NULL ,
-  `Value` TEXT NULL DEFAULT NULL ,
+DROP TABLE IF EXISTS `SCMS`.`UserData` ;
+
+CREATE  TABLE IF NOT EXISTS `SCMS`.`UserData` (
+  `Id` INT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `UserDataTypes_id` INT NOT NULL ,
+  `Users_id` INT NOT NULL ,
+  `Value` TEXT NULL ,
   PRIMARY KEY (`Id`) ,
   UNIQUE INDEX `id_UNIQUE` (`Id` ASC) ,
   INDEX `fk_UserData_UserDataTypes1_idx` (`UserDataTypes_id` ASC) ,
   INDEX `fk_UserData_Users1_idx` (`Users_id` ASC) ,
   CONSTRAINT `fk_UserData_UserDataTypes1`
     FOREIGN KEY (`UserDataTypes_id` )
-    REFERENCES `userdatatypes` (`Id` )
+    REFERENCES `SCMS`.`UserDataTypes` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_UserData_Users1`
     FOREIGN KEY (`Users_id` )
-    REFERENCES `users` (`Id` )
+    REFERENCES `SCMS`.`Users` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8;
+ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `usersingroups`
+-- Table `SCMS`.`ContentDataAccessRights`
 -- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `usersingroups` (
-  `Users_id` INT(11) NOT NULL AUTO_INCREMENT ,
-  `UserGroups_id` INT(11) NOT NULL ,
-  INDEX `fk_UsersInGroups_Users_idx` (`Users_id` ASC) ,
-  INDEX `fk_UsersInGroups_usergroups1_idx` (`UserGroups_id` ASC) ,
-  CONSTRAINT `fk_UsersInGroups_Users`
-    FOREIGN KEY (`Users_id` )
-    REFERENCES `users` (`Id` )
+DROP TABLE IF EXISTS `SCMS`.`ContentDataAccessRights` ;
+
+CREATE  TABLE IF NOT EXISTS `SCMS`.`ContentDataAccessRights` (
+  `Id` INT NOT NULL AUTO_INCREMENT ,
+  `ContentTypeFields_id` INT NOT NULL ,
+  `UserGroups_id` INT NOT NULL ,
+  `Value` VARCHAR(4) NULL ,
+  PRIMARY KEY (`Id`, `UserGroups_id`, `ContentTypeFields_id`) ,
+  INDEX `fk_ContentDataAccessRights_UserGroups1_idx` (`UserGroups_id` ASC) ,
+  INDEX `fk_ContentDataAccessRights_ContentTypeFields1_idx` (`ContentTypeFields_id` ASC) ,
+  CONSTRAINT `fk_ContentDataAccessRights_UserGroups1`
+    FOREIGN KEY (`UserGroups_id` )
+    REFERENCES `SCMS`.`UserGroups` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_UsersInGroups_usergroups1`
-    FOREIGN KEY (`UserGroups_id` )
-    REFERENCES `usergroups` (`Id` )
+  CONSTRAINT `fk_ContentDataAccessRights_ContentTypeFields1`
+    FOREIGN KEY (`ContentTypeFields_id` )
+    REFERENCES `SCMS`.`ContentTypeFields` (`Id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
-ENGINE = InnoDB
-AUTO_INCREMENT = 2
-DEFAULT CHARACTER SET = utf8;
+ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Placeholder table for view `loggedoutcontentaccessrights`
+-- Table `SCMS`.`AuthKeys`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `loggedoutcontentaccessrights` (`UserGroupName` INT, `Access` INT, `UserGroups_id` INT, `ContentTypes_id` INT);
+DROP TABLE IF EXISTS `SCMS`.`AuthKeys` ;
+
+CREATE  TABLE IF NOT EXISTS `SCMS`.`AuthKeys` (
+  `Users_Id` INT NOT NULL ,
+  `Applications_AppId` INT NOT NULL ,
+  `Key` VARCHAR(80) NULL ,
+  `Expire Date` BIGINT NULL ,
+  INDEX `fk_AuthKeys_Users1_idx` (`Users_Id` ASC) ,
+  INDEX `fk_AuthKeys_Applications1_idx` (`Applications_AppId` ASC) ,
+  PRIMARY KEY (`Users_Id`, `Applications_AppId`) ,
+  CONSTRAINT `fk_AuthKeys_Users1`
+    FOREIGN KEY (`Users_Id` )
+    REFERENCES `SCMS`.`Users` (`Id` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_AuthKeys_Applications1`
+    FOREIGN KEY (`Applications_AppId` )
+    REFERENCES `SCMS`.`Applications` (`AppId` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+USE `SCMS` ;
 
 -- -----------------------------------------------------
--- Placeholder table for view `loggedoutcontentdataaccessrights`
+-- Placeholder table for view `SCMS`.`View_Content`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `loggedoutcontentdataaccessrights` (`UserGroupName` INT, `Access` INT, `UserGroups_id` INT, `ContentTypesFields_id` INT);
+CREATE TABLE IF NOT EXISTS `SCMS`.`View_Content` (`Id` INT, `User_Id` INT, `UserGroups_Id` INT, `UserGroups_Name` INT, `AccessRights` INT, `URL` INT, `Type_Id` INT, `Type_Name` INT, `Author_Id` INT, `Author_Email` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `loggedoutgroups`
+-- Placeholder table for view `SCMS`.`View_ContentData`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `loggedoutgroups` (`Id` INT, `name` INT, `created` INT);
+CREATE TABLE IF NOT EXISTS `SCMS`.`View_ContentData` (`Id` INT, `Name` INT, `Value` INT, `ContentTypeFields_Id` INT, `Type` INT, `UserGroup` INT, `Access` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `view_contenttypefields`
+-- Placeholder table for view `SCMS`.`View_Users`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `view_contenttypefields` (`Id` INT, `Name` INT, `Type` INT, `TypeData` INT, `contenttypes_id` INT, `contenttypes_name` INT);
+CREATE TABLE IF NOT EXISTS `SCMS`.`View_Users` (`Id` INT, `Email` INT, `Password` INT, `Registration` INT, `LastLogin` INT, `SSRFEmail` INT, `LanguageName` INT, `LanguageDirection` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `view_languagecontent`
+-- Placeholder table for view `SCMS`.`View_UserData`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `view_languagecontent` (`UserId` INT, `UserGroupId` INT, `UserGroupName` INT, `AccessRights` INT, `ContentId` INT, `Parent` INT, `URL` INT, `TypeId` INT, `TypeName` INT, `AuthorId` INT, `AuthorEmail` INT, `LanguageId` INT, `LanguageName` INT, `LanguageDirection` INT, `ContentLangId` INT, `ContentTitle` INT, `ContentDescription` INT, `DateCreated` INT, `LastModified` INT);
+CREATE TABLE IF NOT EXISTS `SCMS`.`View_UserData` (`UserId` INT, `Name` INT, `Type` INT, `Value` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `view_languagecontentdata`
+-- Placeholder table for view `SCMS`.`View_UsersInGroups`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `view_languagecontentdata` (`ContentId` INT, `title` INT, `ContentLang_id` INT, `Name` INT, `Content` INT, `Type` INT, `UserGroup` INT, `Access` INT);
+CREATE TABLE IF NOT EXISTS `SCMS`.`View_UsersInGroups` (`UserId` INT, `email` INT, `password` INT, `AuthenticationToken` INT, `Id` INT, `Name` INT, `Created` INT, `AssignToLoggedOutUsers` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `view_userdata`
+-- Placeholder table for view `SCMS`.`LoggedOutGroups`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `view_userdata` (`UserId` INT, `Name` INT, `Type` INT, `Value` INT);
+CREATE TABLE IF NOT EXISTS `SCMS`.`LoggedOutGroups` (`id` INT, `name` INT, `created` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `view_usersgroups`
+-- Placeholder table for view `SCMS`.`LoggedOutContentAccessRights`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `view_usersgroups` (`Id` INT, `Name` INT, `Created` INT, `AssignLoggedOutUsers` INT, `UserId` INT);
+CREATE TABLE IF NOT EXISTS `SCMS`.`LoggedOutContentAccessRights` (`UserGroupName` INT, `Access` INT, `UserGroups_id` INT, `ContentTypes_id` INT);
 
 -- -----------------------------------------------------
--- Placeholder table for view `view_usersingroups`
+-- Placeholder table for view `SCMS`.`LoggedOutContentDataAccessRights`
 -- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `view_usersingroups` (`UserId` INT, `email` INT, `password` INT, `AuthenticationToken` INT, `Id` INT, `Name` INT, `Created` INT, `AssignToLoggedOutUsers` INT);
+CREATE TABLE IF NOT EXISTS `SCMS`.`LoggedOutContentDataAccessRights` (`UserGroupName` INT, `Access` INT, `UserGroups_id` INT, `ContentTypesFields_id` INT);
 
 -- -----------------------------------------------------
--- View `loggedoutcontentaccessrights`
+-- Placeholder table for view `SCMS`.`view_UsersGroups`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `loggedoutcontentaccessrights`;
-CREATE  OR REPLACE VIEW `loggedoutcontentaccessrights` AS select `usergroups`.`Name` AS `UserGroupName`,`contentaccessrights`.`Value` AS `Access`,`contentaccessrights`.`UserGroups_id` AS `UserGroups_id`,`contentaccessrights`.`ContentTypes_id` AS `ContentTypes_id` from (`contentaccessrights` left join `usergroups` on((`contentaccessrights`.`UserGroups_id` = `usergroups`.`Id`))) where (`usergroups`.`AssignLoggedOutUsers` = 1);
+CREATE TABLE IF NOT EXISTS `SCMS`.`view_UsersGroups` (`Name` INT, `Created` INT, `AssignLoggedOutUsers` INT, `UsersId` INT);
 
 -- -----------------------------------------------------
--- View `loggedoutcontentdataaccessrights`
+-- View `SCMS`.`View_Content`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `loggedoutcontentdataaccessrights`;
-CREATE  OR REPLACE VIEW `loggedoutcontentdataaccessrights` AS select `usergroups`.`Name` AS `UserGroupName`,`contentdataaccessrights`.`Value` AS `Access`,`contentdataaccessrights`.`UserGroups_id` AS `UserGroups_id`,`contentdataaccessrights`.`ContentTypeFields_id` AS `ContentTypesFields_id` from (`contentdataaccessrights` left join `usergroups` on((`contentdataaccessrights`.`UserGroups_id` = `usergroups`.`Id`))) where (`usergroups`.`AssignLoggedOutUsers` = 1);
+DROP VIEW IF EXISTS `SCMS`.`View_Content` ;
+DROP TABLE IF EXISTS `SCMS`.`View_Content`;
+USE `SCMS`;
+CREATE  OR REPLACE VIEW `SCMS`.`View_Content` AS
+SELECT
+`Content`.`Id` as `Id`,
+`UsersInGroups`.`Users_id` as `User_Id`,
+`ContentAccessRights`.`UserGroups_Id` as `UserGroups_Id`,
+`UserGroups`.`name` as `UserGroups_Name`,
+`ContentAccessRights`.`value` as `AccessRights`,
+`Content`.`URL` as `URL`,
+`Content`.`ContentTypes_Id` as `Type_Id`,
+`ContentTypes`.`name` as `Type_Name`,
+`Content`.`Author_id` as `Author_Id`,
+`Author`.`email` as `Author_Email`
+FROM `Content`
+LEFT JOIN `Applications` on (`Content`.`Applications_AppId` = `Applications`.`AppId`)
+LEFT JOIN `AuthKeys` on (`Content`.`Applications_AppId` = `AuthKeys`.`Applications_AppId`)
+LEFT JOIN `ContentTypes` on (`Content`.`ContentTypes_Id` = `ContentTypes`.`Id`)
+LEFT JOIN `ContentAccessRights` on (`Content`.`ContentTypes_Id` = `ContentAccessRights`.`ContentTypes_Id`)
+LEFT JOIN `UsersInGroups` on (`ContentAccessRights`.`UserGroups_Id` = `UsersInGroups`.`UserGroups_Id`)
+LEFT JOIN `UserGroups` on (`ContentAccessRights`.`UserGroups_Id` = `UserGroups`.`Id`)
+LEFT JOIN `Users` `Author` on (`Author`.`Id` = `Content`.`Author_Id`)
+;
 
 -- -----------------------------------------------------
--- View `loggedoutgroups`
+-- View `SCMS`.`View_ContentData`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `loggedoutgroups`;
-CREATE  OR REPLACE VIEW `loggedoutgroups` AS select `usergroups`.`Id` AS `Id`,`usergroups`.`Name` AS `name`,`usergroups`.`Created` AS `created` from `usergroups` where (`usergroups`.`AssignLoggedOutUsers` = 1);
+DROP VIEW IF EXISTS `SCMS`.`View_ContentData` ;
+DROP TABLE IF EXISTS `SCMS`.`View_ContentData`;
+USE `SCMS`;
+CREATE  OR REPLACE VIEW `SCMS`.`View_ContentData` AS
+SELECT
+`ContentData`.`Id` as `Id`,
+`ContentTypeFields`.`Name` AS `Name`,
+`ContentData`.`Value` as `Value`,
+`ContentData`.`ContentTypeFields_Id` as `ContentTypeFields_Id`,
+`ContentTypeFields`.`Type` as `Type`,
+`ContentDataAccessRights`.`UserGroups_id` as `UserGroup`,
+`ContentDataAccessRights`.`Value` as `Access`
+FROM `ContentData`
+LEFT JOIN `ContentTypeFields` ON (`ContentData`.`ContentTypeFields_Id` = `ContentTypeFields`.`Id`)
+LEFT JOIN `ContentDataAccessRights` ON (`ContentTypeFields`.`Id` = `ContentDataAccessRights`.`ContentTypeFields_Id` )
+LEFT JOIN `UserGroups` ON (`ContentDataAccessRights`.`UserGroups_Id` = `UserGroups`.`Id`);
 
 -- -----------------------------------------------------
--- View `view_contenttypefields`
+-- View `SCMS`.`View_Users`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `view_contenttypefields`;
-CREATE  OR REPLACE VIEW `view_contenttypefields` AS select `contenttypefields`.`id` AS `Id`,`contenttypefields`.`Name` AS `Name`,`contenttypefields`.`Type` AS `Type`,`contenttypefields`.`TypeData` AS `TypeData`,`contenttypes`.`Id` AS `contenttypes_id`,`contenttypes`.`Name` AS `contenttypes_name` from (`contenttypefields` left join `contenttypes` on((`contenttypefields`.`ContentTypes_id` = `contenttypes`.`Id`)));
+DROP VIEW IF EXISTS `SCMS`.`View_Users` ;
+DROP TABLE IF EXISTS `SCMS`.`View_Users`;
+USE `SCMS`;
+CREATE  OR REPLACE VIEW `SCMS`.`View_Users` AS
+SELECT 
+`Users`.`Id`,
+`Users`.`Email`,
+`Users`.`Password`,
+`Users`.`Registration`,
+`Users`.`LastLogin`,
+`Users`.`SSRFEmail`,
+`Languages`.`Name` as `LanguageName`,
+`Languages`.`Direction` as `LanguageDirection`
+FROM `Users`
+LEFT JOIN `Languages` ON ( `Users`.`Languages_id` = `Languages`.`id` )
+
+;
 
 -- -----------------------------------------------------
--- View `view_languagecontent`
+-- View `SCMS`.`View_UserData`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `view_languagecontent`;
-CREATE  OR REPLACE VIEW `view_languagecontent` AS select `usersingroups`.`Users_id` AS `UserId`,`contentaccessrights`.`UserGroups_id` AS `UserGroupId`,`usergroups`.`Name` AS `UserGroupName`,`contentaccessrights`.`Value` AS `AccessRights`,`content`.`id` AS `ContentId`,`content`.`Parent_id` AS `Parent`,`content`.`URL` AS `URL`,`content`.`ContentTypes_id` AS `TypeId`,`contenttypes`.`Name` AS `TypeName`,`content`.`Users_id` AS `AuthorId`,`author`.`Email` AS `AuthorEmail`,`contentlang`.`Languages_id` AS `LanguageId`,`languages`.`Name` AS `LanguageName`,`languages`.`Direction` AS `LanguageDirection`,`contentlang`.`Id` AS `ContentLangId`,`contentlang`.`Title` AS `ContentTitle`,`contentlang`.`Description` AS `ContentDescription`,`contentlang`.`Created` AS `DateCreated`,`contentlang`.`LastModified` AS `LastModified` from (((((((((`content` left join `applications` on((`content`.`Applications_AppId` = `applications`.`AppId`))) left join `authkeys` on((`content`.`Applications_AppId` = `authkeys`.`Applications_AppId`))) left join `contentlang` on((`contentlang`.`Content_id` = `content`.`id`))) left join `contenttypes` on((`content`.`ContentTypes_id` = `contenttypes`.`Id`))) left join `languages` on((`contentlang`.`Languages_id` = `languages`.`Id`))) left join `contentaccessrights` on((`content`.`ContentTypes_id` = `contentaccessrights`.`ContentTypes_id`))) left join `usersingroups` on((`contentaccessrights`.`UserGroups_id` = `usersingroups`.`UserGroups_id`))) left join `usergroups` on((`contentaccessrights`.`UserGroups_id` = `usergroups`.`Id`))) left join `users` `author` on((`author`.`Id` = `content`.`Users_id`)));
+DROP VIEW IF EXISTS `SCMS`.`View_UserData` ;
+DROP TABLE IF EXISTS `SCMS`.`View_UserData`;
+USE `SCMS`;
+CREATE  OR REPLACE VIEW `SCMS`.`View_UserData` AS
+SELECT
+`Users_Id` as `UserId`,
+`UserDataTypes`.`Name` as `Name`,
+`UserDataTypes`.`Type` as `Type`,
+`UserData`.`Value` as `Value`
+FROM `UserData`
+LEFT JOIN `UserDataTypes` On ( `UserData`.`UserDataTypes_Id` = `UserDataTypes`.`Id` )
+;
 
 -- -----------------------------------------------------
--- View `view_languagecontentdata`
+-- View `SCMS`.`View_UsersInGroups`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `view_languagecontentdata`;
-CREATE  OR REPLACE VIEW `view_languagecontentdata` AS select `contentlang`.`Content_id` AS `ContentId`,`contentlang`.`Title` AS `title`,`contentlang`.`Id` AS `ContentLang_id`,`contenttypefields`.`Name` AS `Name`,`contentdata`.`Value` AS `Content`,`contenttypefields`.`Type` AS `Type`,`contentdataaccessrights`.`UserGroups_id` AS `UserGroup`,`contentdataaccessrights`.`Value` AS `Access` from ((((`contentdata` left join `contentlang` on((`contentdata`.`ContentLang_id` = `contentlang`.`Id`))) left join `contenttypefields` on((`contentdata`.`ContentTypeFields_id` = `contenttypefields`.`id`))) left join `contentdataaccessrights` on((`contenttypefields`.`id` = `contentdataaccessrights`.`ContentTypeFields_id`))) left join `usergroups` on((`contentdataaccessrights`.`UserGroups_id` = `usergroups`.`Id`)));
+DROP VIEW IF EXISTS `SCMS`.`View_UsersInGroups` ;
+DROP TABLE IF EXISTS `SCMS`.`View_UsersInGroups`;
+USE `SCMS`;
+CREATE  OR REPLACE VIEW `SCMS`.`View_UsersInGroups` AS
+SELECT 
+	`UsersInGroups`.`Users_id` as `UserId`,
+	`Users`.`email` as `email`,
+	`Users`.`password` as `password`,
+	`Users`.`AuthenticationToken` as `AuthenticationToken`,
+	`UserGroups`.`id` as `Id`,
+	`UserGroups`.`name` as `Name`,
+	`UserGroups`.`created` as `Created`,
+	`UserGroups`.`AssignLoggedOutUsers` as `AssignToLoggedOutUsers`
+FROM `UsersInGroups`
+LEFT JOIN `Users` on ( `UsersInGroups`.`Users_id` = `Users`.`id` )
+LEFT JOIN `UserGroups` on ( `UsersInGroups`.`UserGroups_id` = `UserGroups`.`id`);
 
 -- -----------------------------------------------------
--- View `view_userdata`
+-- View `SCMS`.`LoggedOutGroups`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `view_userdata`;
-CREATE  OR REPLACE VIEW `view_userdata` AS select `userdata`.`Users_id` AS `UserId`,`userdatatypes`.`Name` AS `Name`,`userdatatypes`.`Type` AS `Type`,`userdata`.`Value` AS `Value` from (`userdata` left join `userdatatypes` on((`userdata`.`UserDataTypes_id` = `userdatatypes`.`Id`)));
+DROP VIEW IF EXISTS `SCMS`.`LoggedOutGroups` ;
+DROP TABLE IF EXISTS `SCMS`.`LoggedOutGroups`;
+USE `SCMS`;
+CREATE  OR REPLACE VIEW `SCMS`.`LoggedOutGroups` AS
+SELECT 
+	`UserGroups`.`id` as `id`,
+	`UserGroups`.`name` as `name`,
+	`UserGroups`.`created` as `created`
+FROM `UserGroups`
+WHERE `UserGroups`.`assignLoggedOutUsers` = 1
+;
 
 -- -----------------------------------------------------
--- View `view_usersgroups`
+-- View `SCMS`.`LoggedOutContentAccessRights`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `view_usersgroups`;
-CREATE  OR REPLACE VIEW `view_usersgroups` AS select `usergroups`.`Id` AS `Id`,`usergroups`.`Name` AS `Name`,`usergroups`.`Created` AS `Created`,`usergroups`.`AssignLoggedOutUsers` AS `AssignLoggedOutUsers`,`usersingroups`.`Users_id` AS `UserId` from (`usergroups` left join `usersingroups` on((`usergroups`.`Id` = `usersingroups`.`UserGroups_id`)));
+DROP VIEW IF EXISTS `SCMS`.`LoggedOutContentAccessRights` ;
+DROP TABLE IF EXISTS `SCMS`.`LoggedOutContentAccessRights`;
+USE `SCMS`;
+CREATE  OR REPLACE VIEW `SCMS`.`LoggedOutContentAccessRights` AS 
+SELECT
+`Name` as `UserGroupName`,
+`Value` as `Access`,
+`UserGroups_id` as `UserGroups_id`,
+`ContentTypes_id` as `ContentTypes_id`
+FROM `ContentAccessRights`
+LEFT JOIN `UserGroups` on (`ContentAccessRights`.`UserGroups_id` = `UserGroups`.`Id`)
+WHERE `AssignLoggedOutUsers` = 1;
 
 -- -----------------------------------------------------
--- View `view_usersingroups`
+-- View `SCMS`.`LoggedOutContentDataAccessRights`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `view_usersingroups`;
-CREATE  OR REPLACE VIEW `view_usersingroups` AS select `usersingroups`.`Users_id` AS `UserId`,`users`.`Email` AS `email`,`users`.`Password` AS `password`,`users`.`AuthenticationToken` AS `AuthenticationToken`,`usergroups`.`Id` AS `Id`,`usergroups`.`Name` AS `Name`,`usergroups`.`Created` AS `Created`,`usergroups`.`AssignLoggedOutUsers` AS `AssignToLoggedOutUsers` from ((`usersingroups` left join `users` on((`usersingroups`.`Users_id` = `users`.`Id`))) left join `usergroups` on((`usersingroups`.`UserGroups_id` = `usergroups`.`Id`)));
+DROP VIEW IF EXISTS `SCMS`.`LoggedOutContentDataAccessRights` ;
+DROP TABLE IF EXISTS `SCMS`.`LoggedOutContentDataAccessRights`;
+USE `SCMS`;
+CREATE  OR REPLACE VIEW `SCMS`.`LoggedOutContentDataAccessRights` AS 
+SELECT
+`Name` as `UserGroupName`,
+`Value` as `Access`,
+`UserGroups_id` as `UserGroups_id`,
+`ContentTypeFields_id` as `ContentTypesFields_id`
+FROM `ContentDataAccessRights`
+LEFT JOIN `UserGroups` on (`ContentDataAccessRights`.`UserGroups_id` = `UserGroups`.`Id`)
+WHERE `AssignLoggedOutUsers` = 1;
+
+-- -----------------------------------------------------
+-- View `SCMS`.`view_UsersGroups`
+-- -----------------------------------------------------
+DROP VIEW IF EXISTS `SCMS`.`view_UsersGroups` ;
+DROP TABLE IF EXISTS `SCMS`.`view_UsersGroups`;
+USE `SCMS`;
+CREATE  OR REPLACE VIEW `SCMS`.`view_UsersGroups` AS
+SELECT 
+`usergroups`.`Name` as `Name`,
+`usergroups`.`Created` as `Created`,
+`usergroups`.`AssignLoggedOutUsers` as `AssignLoggedOutUsers`,
+`UsersInGroups`.`Users_id` as `UsersId`
+FROM `usergroups`
+LEFT JOIN  `UsersInGroups` on (`usergroups`.`Id` = `usersingroups`.`UserGroups_id`)
+;
 
 
 SET SQL_MODE=@OLD_SQL_MODE;

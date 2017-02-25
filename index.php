@@ -75,9 +75,31 @@ class AppError
     public function getDate() { return $this->date; }
 }
 
+function ClassAutoLoader($class)
+{
+    
+    $nsList = explode('\\',$class);
+    $name = end($nsList);
+    $path = "";
+    if ( count($nsList) == 2 )
+    {
+        $subFolder = $nsList[0];
+        $commonPath = SOURCE_FOLDER.COMMON_FOLDER ."{$subFolder}/{$name}.php";
+        $appPath =  SOURCE_FOLDER.APP_FOLDER  ."{$subFolder}/{$name}.php";
+        if (file_exists($commonPath)) { $path = $commonPath; } // Common models override custom ones
+        else if (file_exists($appPath)) { $path = $appPath; }
+        else { throw new Exception("{$subFolder} not found: {$class}"); }
+    }
+    else
+    {
+        $path = APP_FOLDER . "{$name}.php";
+    }
+    include_once $path;
+}
+spl_autoload_register('ClassAutoLoader');
+
 function SendErrorEmail(AppError $err)
 {
-	
     $template=
         '
         An error has occurred on the website.<br />
@@ -100,41 +122,41 @@ function SendErrorEmail(AppError $err)
 
 function ShowError(AppError $err)
 {
-	$stackTrace = debug_backtrace();
-	$st = "";
-	$template = '
-	<div class="container-fluid">
-		<div class="row">
-			%s(%s) in %s Argument data:
-			<div class="btn pull-right" data-toggle="collapse" data-target="%s" aria-expanded="false" aria-controls="manifest">
-				<span class="caret"></span>
-				<span class="sr-only">Toggle error args</span>
-			</div>
-			<div id="%s" class="collapse" ><pre>(%s)</pre></div>
-		</div>
-	</div>
-	';
-	foreach ($stackTrace as $line)
-	{
-		$refID = uniqid("err");
-		$file = array_key_exists('file',$line)?$line['file']:'';
-		$l = array_key_exists('line',$line)?$line['line']:'';
-		$function = array_key_exists('function',$line)?$line['function']:'';
-		$args = array_key_exists('args',$line)?print_r($line['args'],true):'';
-		$st .= sprintf($template,$file,$l,$function,"#{$refID}",$refID,$args);
-	}
+    $stackTrace = debug_backtrace();
+    $st = "";
+    $template = '
+    <div class="container-fluid">
+            <div class="row">
+                    %s(%s) in %s Argument data:
+                    <div class="btn pull-right" data-toggle="collapse" data-target="%s" aria-expanded="false" aria-controls="manifest">
+                            <span class="caret"></span>
+                            <span class="sr-only">Toggle error args</span>
+                    </div>
+                    <div id="%s" class="collapse" ><pre>(%s)</pre></div>
+            </div>
+    </div>
+    ';
+    foreach ($stackTrace as $line)
+    {
+        $refID = uniqid("err");
+        $file = array_key_exists('file',$line)?$line['file']:'';
+        $l = array_key_exists('line',$line)?$line['line']:'';
+        $function = array_key_exists('function',$line)?$line['function']:'';
+        $args = array_key_exists('args',$line)?print_r($line['args'],true):'';
+        $st .= sprintf($template,$file,$l,$function,"#{$refID}",$refID,$args);
+    }
 		
     printf('
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">	
-    <title>Error</title>	
-</head>
-<body>   
-<main class="container"  role="main">
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">	
+        <title>Error</title>	
+    </head>
+    <body>   
+    <main class="container"  role="main">
     <header>
     </header>
     ');
@@ -193,28 +215,28 @@ function ExceptionHandeler($ex)
 function ErrorHandeler($errno, $errstr, $errfile, $errline)
 {
     $err = new AppError($errno, $errstr, $errfile, $errline);
-	ShowError($err);
+    ShowError($err);
     /* Don't execute PHP internal error handler */
     return false;	
 }
 
 $old_exception_handler 	= set_exception_handler("ExceptionHandeler");
-$old_error_handler 		= set_error_handler("ErrorHandeler");
+$old_error_handler      = set_error_handler("ErrorHandeler");
 
-$data 							= array();
-$config 						= array();
+$data 				= array();
+$config 			= array();
 
-$defaults 						= array();
-$defaults['site_title'] 		= 'Site Title';
-$defaults['page_title'] 		= 'Page Title';
-$defaults['site_slogan'] 		= 'Site Slogan goes here';
+$defaults 			= array();
+$defaults['site_title'] 	= 'Site Title';
+$defaults['page_title'] 	= 'Page Title';
+$defaults['site_slogan'] 	= 'Site Slogan goes here';
 $defaults['html_title_format'] 	= '%s - %s';
-$defaults['page_content'] 		= 'Page content not found';
-$defaults['theme']				= 'Default';
+$defaults['page_content'] 	= 'Page content not found';
+$defaults['theme']		= 'Default';
 
-require_once(APP_FOLDER . "app.config.php");
-require_once(APP_FOLDER . "view.php");
-require_once(APP_FOLDER . "Controller.php");
+require_once(SOURCE_FOLDER . "app.config.php");
+require_once(SOURCE_FOLDER . "view.php");
+require_once(SOURCE_FOLDER . "Controller.php");
 
 $config = array_replace_recursive($defaults,$config);
 
@@ -229,36 +251,36 @@ function SetLoggedOutGroups()
 }
 class URL
 {
-	public static function GetURIs($path)
-	{
-		$getParamsStart = strrpos($path,"?");
-		if ($getParamsStart > 0 )
-		{
-			$pathWOGet = substr($path,0,$getParamsStart);
-		}
-		else
-		{
-			$pathWOGet = $path;
-		}
-		$output = array();
-		foreach (explode("/", $pathWOGet) as $uri)
-		{
-			if ( $uri && strlen($uri) > 0 )
-			{
-				$output[] = $uri;
-			}
-		}
-		return $output;		
-	}
-	/***
-	 * Gets the controller 'root'
-	 * @Param int $offset The number of uri's in it should consider as the controller root. Good for when we want an invoker outside the applications root.
-	 */
-	public static function GetRoot($offset = 0)
-	{
-		$parameters = URL::GetURIs($_SERVER['REQUEST_URI']);
-		return'/' + isset($parameters[$offset])?$parameters[$offset]:'';
-	}
+    public static function GetURIs($path)
+    {
+        $getParamsStart = strrpos($path,"?");
+        if ($getParamsStart > 0 )
+        {
+            $pathWOGet = substr($path,0,$getParamsStart);
+        }
+        else
+        {
+            $pathWOGet = $path;
+        }
+        $output = array();
+        foreach (explode("/", $pathWOGet) as $uri)
+        {
+            if ( $uri && strlen($uri) > 0 )
+            {
+                $output[] = $uri;
+            }
+        }
+        return $output;		
+    }
+    /***
+     * Gets the controller 'root'
+     * @Param int $offset The number of uri's in it should consider as the controller root. Good for when we want an invoker outside the applications root.
+     */
+    public static function GetRoot($offset = 0)
+    {
+        $parameters = URL::GetURIs($_SERVER['REQUEST_URI']);
+        return'/' + isset($parameters[$offset])?$parameters[$offset]:'';
+    }
 }
 
 SetLoggedOutGroups();
@@ -285,4 +307,7 @@ $viewConfig = new ViewData($config);
 $controller = new Controller($root, $viewData,$viewConfig);
 $controller->Initiate($foundCtlr->Controller);
 $controller->AddData('mainContent',$controller->Run($_SERVER['REQUEST_URI'], CheckRequestMethod()));
+header('X-Frame-Options: SAMEORIGIN');
+header('X-XSS-Protection: 1; mode=block');
+header('X-Content-Type-Options: nosniff');
 $controller->ShowPageView('page');
